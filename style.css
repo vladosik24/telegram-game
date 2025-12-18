@@ -1,9 +1,2 @@
-body {
-  font-family: Arial, sans-serif;
-  text-align: center;
-  margin-top: 50px;
-}
-button {
-  font-size: 24px;
-  padding: 10px 20px;
-}
+body { text-align: center; font-family: Arial, sans-serif; margin-top: 50px; }
+button { font-size: 24px; padding: 10px 20px; }
