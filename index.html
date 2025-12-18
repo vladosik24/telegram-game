@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Gra Ukraine 🇺🇦</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <h2>Gra Ukraine 🇺🇦</h2>
@@ -11,5 +12,13 @@
   <p>Очки: <span id="score">0</span></p>
 
   <script src="game.js"></script>
+  <script>
+    // Telegram Game API readiness check
+    window.onload = function() {
+      if (!window.TelegramGameProxy) {
+        alert("Ця гра має запускатися тільки через Telegram!");
+      }
+    };
+  </script>
 </body>
 </html>
