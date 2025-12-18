@@ -10,6 +10,22 @@
   <button onclick="addScore()">+1</button>
   <p>Очки: <span id="score">0</span></p>
 
-  <script src="game.js"></script>
+  <script>
+    let score = 0;
+    function addScore() {
+      score++;
+      document.getElementById("score").innerText = score;
+      if (window.TelegramGameProxy) {
+        TelegramGameProxy.setScore(score);
+      }
+    }
+
+    // Важливо: обов’язково чекати TelegramGameProxy readiness
+    window.onload = function() {
+      if (window.TelegramGameProxy) {
+        console.log('TelegramGameProxy ready');
+      }
+    };
+  </script>
 </body>
 </html>
