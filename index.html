@@ -2,23 +2,75 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8">
-  <title>Gra Ukraine 🇺🇦</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
+  <title>Ukraine Clicker 🇺🇦</title>
+
+  <!-- Telegram Web App -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #0057B7, #FFD700);
+      font-family: Arial, sans-serif;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .game {
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    .score {
+      font-size: 24px;
+      margin: 15px 0;
+    }
+
+    button {
+      font-size: 24px;
+      padding: 20px 40px;
+      border: none;
+      border-radius: 12px;
+      background: #000;
+      color: #FFD700;
+      cursor: pointer;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+  </style>
 </head>
 <body>
-  <h2>Gra Ukraine 🇺🇦</h2>
-  <button onclick="addScore()">+1</button>
-  <p>Очки: <span id="score">0</span></p>
 
-  <script src="game.js"></script>
-  <script>
-    // Telegram Game API readiness check
-    window.onload = function() {
-      if (!window.TelegramGameProxy) {
-        alert("Ця гра має запускатися тільки через Telegram!");
-      }
-    };
-  </script>
+<div class="game">
+  <h1>🇺🇦 Ukraine Clicker</h1>
+  <div class="score">Очки: <span id="score">0</span></div>
+  <button onclick="clickGame()">Тисни!</button>
+</div>
+
+<script>
+  const tg = window.Telegram.WebApp;
+  tg.ready();
+  tg.expand();
+
+  let score = 0;
+
+  function clickGame() {
+    score++;
+    document.getElementById("score").innerText = score;
+
+    // тактильний фідбек
+    tg.HapticFeedback.impactOccurred("medium");
+  }
+</script>
+
 </body>
 </html>
