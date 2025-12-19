@@ -5,9 +5,9 @@
 }
 
 body {
-  background: linear-gradient(180deg, #0057B7, #FFD700);
+  background: linear-gradient(180deg, #4A90E2, #FFE44D) !important;
   font-family: Arial, sans-serif;
-  color: #fff;
+  color: #1a1a1a !important;
   min-height: 100vh;
   padding: 10px;
 }
@@ -21,23 +21,23 @@ body {
 .header {
   text-align: center;
   padding: 15px;
-  background: rgba(0,0,0,0.15);
+  background: rgba(255,255,255,0.9);
   border-radius: 12px;
   margin-bottom: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .header h1 {
   font-size: 24px;
   margin-bottom: 10px;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  color: #1a1a1a;
 }
 
 .resources {
   display: flex;
   justify-content: space-around;
   font-size: 18px;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+  color: #1a1a1a;
 }
 
 /* ТАБИ */
@@ -50,31 +50,30 @@ body {
 .tab {
   flex: 1;
   padding: 12px;
-  background: rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.7);
   border: none;
-  color: #fff;
+  color: #1a1a1a;
   font-size: 16px;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+  font-weight: 500;
 }
 
 .tab.active {
   background: #FFD700;
   color: #000;
   font-weight: bold;
-  text-shadow: none;
 }
 
 /* ЕКРАНИ */
 .screen {
   display: none;
-  background: rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.85);
   padding: 20px;
   border-radius: 12px;
   min-height: 400px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .screen.active {
@@ -83,32 +82,32 @@ body {
 
 /* АРЕНА */
 .enemy-card {
-  background: rgba(255,50,50,0.25);
+  background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
   padding: 20px;
   border-radius: 12px;
   text-align: center;
   margin-bottom: 20px;
-  border: 2px solid rgba(255,255,255,0.2);
+  border: 2px solid rgba(255,255,255,0.3);
 }
 
 .enemy-name {
   font-size: 22px;
   margin-bottom: 10px;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  color: #fff;
+  font-weight: bold;
 }
 
 .enemy-hp {
   font-size: 28px;
-  color: #ffeeee;
+  color: #fff;
   margin: 15px 0;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
   font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
 }
 
 .enemy-level {
   font-size: 14px;
-  color: #fff8dc;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+  color: #ffe0b2;
 }
 
 /* КНОПКИ */
@@ -132,7 +131,6 @@ body {
 .btn-attack {
   background: #ff5555;
   color: #fff;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
 }
 
 .btn-primary {
@@ -142,11 +140,11 @@ body {
 
 /* БУДІВЛІ */
 .building {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.9);
   padding: 15px;
   border-radius: 12px;
   margin-bottom: 15px;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(0,0,0,0.1);
 }
 
 .building-header {
@@ -158,7 +156,8 @@ body {
 
 .building-title {
   font-size: 18px;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+  color: #1a1a1a;
+  font-weight: 600;
 }
 
 .building-level {
@@ -172,14 +171,15 @@ body {
 
 .building-desc {
   font-size: 14px;
-  color: #f0f0f0;
+  color: #555;
   margin-bottom: 10px;
 }
 
 .building-cost {
   font-size: 16px;
   margin-bottom: 10px;
-  color: #fff8dc;
+  color: #1a1a1a;
+  font-weight: 500;
 }
 
 .btn-upgrade {
@@ -187,13 +187,13 @@ body {
   color: #fff;
   padding: 10px;
   font-size: 16px;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
 }
 
 .btn-upgrade:disabled {
-  background: #999;
+  background: #ccc;
   cursor: not-allowed;
   opacity: 0.6;
+  color: #666;
 }
 
 /* СТАТИСТИКА */
@@ -203,24 +203,23 @@ body {
 }
 
 .stat-card {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.9);
   padding: 15px;
   border-radius: 12px;
   text-align: center;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(0,0,0,0.1);
 }
 
 .stat-value {
   font-size: 32px;
   font-weight: bold;
-  color: #FFD700;
+  color: #f39c12;
   margin: 10px 0;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
 }
 
 .stat-label {
   font-size: 14px;
-  color: #f0f0f0;
+  color: #555;
 }
 
 /* ПОВІДОМЛЕННЯ */
@@ -229,7 +228,7 @@ body {
   top: 20px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(0,0,0,0.85);
+  background: rgba(0,0,0,0.9);
   color: #FFD700;
   padding: 15px 30px;
   border-radius: 12px;
