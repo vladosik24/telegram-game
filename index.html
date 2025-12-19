@@ -2,7 +2,7 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8">
-  <title>Ukraine Clicker 🇺🇦</title>
+  <title>Козацька Арена 🇺🇦</title>
 
   <!-- Telegram Web App -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -11,49 +11,79 @@
     body {
       margin: 0;
       padding: 0;
-      background: linear-gradient(135deg, #0057B7, #FFD700);
+      background: linear-gradient(180deg, #003C8F, #FFD700);
       font-family: Arial, sans-serif;
       color: #fff;
+      height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
     }
 
     .game {
       text-align: center;
+      max-width: 320px;
+      width: 100%;
+      background: rgba(0,0,0,0.25);
+      padding: 20px;
+      border-radius: 16px;
     }
 
     h1 {
-      margin-bottom: 10px;
+      margin-top: 0;
     }
 
-    .score {
-      font-size: 24px;
+    .enemy {
+      font-size: 20px;
       margin: 15px 0;
     }
 
+    .hp {
+      font-size: 22px;
+      margin: 10px 0;
+    }
+
+    .stats {
+      margin: 15px 0;
+      font-size: 16px;
+    }
+
     button {
-      font-size: 24px;
-      padding: 20px 40px;
+      width: 100%;
+      padding: 16px;
+      font-size: 22px;
       border: none;
       border-radius: 12px;
       background: #000;
       color: #FFD700;
       cursor: pointer;
+      margin-top: 10px;
     }
 
     button:active {
-      transform: scale(0.95);
+      transform: scale(0.96);
     }
   </style>
 </head>
 <body>
 
 <div class="game">
-  <h1>🇺🇦 Ukraine Clicker</h1>
-  <div class="score">Очки: <span id="score">0</span></div>
-  <button onclick="clickGame()">Тисни!</button>
+  <h1>⚔️ Козацька Арена</h1>
+
+  <div class="enemy">
+    Ворог: <strong id="enemyName">Загарбник</strong>
+  </div>
+
+  <div class="hp">
+    ❤️ HP: <span id="enemyHp">20</span>
+  </div>
+
+  <div class="stats">
+    🏆 Перемоги: <span id="wins">0</span><br>
+    💰 Ресурси: <span id="gold">0</span>
+  </div>
+
+  <button onclick="attack()">⚔️ Удар</button>
 </div>
 
 <script>
@@ -61,14 +91,29 @@
   tg.ready();
   tg.expand();
 
-  let score = 0;
+  let enemyHp = 20;
+  let wins = 0;
+  let gold = 0;
 
-  function clickGame() {
-    score++;
-    document.getElementById("score").innerText = score;
-
-    // тактильний фідбек
+  function attack() {
+    enemyHp--;
     tg.HapticFeedback.impactOccurred("medium");
+
+    if (enemyHp <= 0) {
+      wins++;
+      gold += 10;
+      enemyHp = 20;
+
+      tg.HapticFeedback.notificationOccurred("success");
+    }
+
+    updateUI();
+  }
+
+  function updateUI() {
+    document.getElementById("enemyHp").innerText = enemyHp;
+    document.getElementById("wins").innerText = wins;
+    document.getElementById("gold").innerText = gold;
   }
 </script>
 
