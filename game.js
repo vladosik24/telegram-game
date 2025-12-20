@@ -5,6 +5,19 @@ const tg = window.Telegram.WebApp;
 tg.ready();
 tg.expand();
 
+// Глобальні функції для onclick
+window.attack = attack;
+window.specialAttack = specialAttack;
+window.usePotion = usePotion;
+window.switchTab = switchTab;
+window.upgradeBuilding = upgradeBuilding;
+window.buyItem = buyItem;
+window.useItem = useItem;
+window.selectClass = selectClass;
+window.unlockSkill = unlockSkill;
+window.changeLocation = changeLocation;
+window.loadLeaderboard = loadLeaderboard;
+window.unequipItem = unequipItem;
 // ============================================
 // ДАНІ ГРИ
 // ============================================
