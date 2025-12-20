@@ -1461,3 +1461,23 @@ function showMessage(text) {
 // СТАРТ ГРИ
 // ============================================
 loadGame();
+// === FIX ДЛЯ КНОПОК ===
+window.attack = function () {
+  console.log("ATTACK CLICK");
+  if (typeof attackEnemy === "function") {
+    attackEnemy();
+  } else {
+    alert("attackEnemy не знайдена");
+  }
+};
+
+window.specialAttack = function () {
+  console.log("SPECIAL CLICK");
+  if (typeof window.specialAttackInternal === "function") {
+    window.specialAttackInternal();
+  } else if (typeof window.specialAttack === "function") {
+    // якщо є стара
+  } else {
+    alert("specialAttack не знайдена");
+  }
+};
