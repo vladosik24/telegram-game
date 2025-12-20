@@ -5,7 +5,529 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Козацька Арена 🇺🇦</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <link rel="stylesheet" href="css/style.css">
+  
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      background: linear-gradient(180deg, #4A90E2 0%, #FFE44D 100%) !important;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      color: #000 !important;
+      min-height: 100vh;
+      padding: 10px;
+      overflow-x: hidden;
+    }
+
+    .container { max-width: 400px; margin: 0 auto; }
+
+    .header {
+      text-align: center;
+      padding: 15px;
+      background: #ffffff !important;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .header h1 { 
+      font-size: 24px; 
+      margin-bottom: 10px; 
+      color: #000 !important; 
+    }
+
+    .resources {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      font-size: 15px;
+      color: #000 !important;
+    }
+
+    .resource-item {
+      background: #f0f0f0;
+      padding: 8px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      font-weight: 500;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 10px;
+      overflow-x: auto;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 10px;
+      background: #e8e8e8 !important;
+      border: none;
+      color: #000 !important;
+      font-size: 13px;
+      border-radius: 8px;
+      cursor: pointer;
+      white-space: nowrap;
+      font-weight: 500;
+    }
+
+    .tab.active {
+      background: #FFD700 !important;
+      font-weight: bold;
+    }
+
+    .screen {
+      display: none;
+      background: #ffffff !important;
+      padding: 15px;
+      border-radius: 12px;
+      min-height: 400px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .screen.active { display: block; }
+
+    .location-select {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .location-card {
+      background: #f5f5f5;
+      padding: 12px;
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .location-card.active {
+      border-color: #FFD700;
+      background: #FFF8DC;
+    }
+
+    .location-card.locked {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .location-icon { font-size: 28px; margin-bottom: 3px; }
+    .location-name { font-weight: bold; color: #000 !important; font-size: 13px; }
+
+    .player-hp {
+      background: #f5f5f5;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+
+    .player-hp-text {
+      text-align: center;
+      color: #000 !important;
+      font-weight: bold;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+
+    .enemy-card {
+      background: linear-gradient(135deg, #ff6b6b, #ee5a6f) !important;
+      padding: 15px;
+      border-radius: 12px;
+      text-align: center;
+      margin-bottom: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .enemy-card.shake { animation: shake 0.3s; }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    .enemy-image {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 10px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+    }
+
+    .enemy-name {
+      font-size: 20px;
+      margin-bottom: 5px;
+      color: #fff !important;
+      font-weight: bold;
+    }
+
+    .enemy-level {
+      font-size: 13px;
+      color: #ffe0b2 !important;
+      margin-bottom: 8px;
+    }
+
+    .hp-bar {
+      width: 100%;
+      height: 18px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 8px 0;
+      position: relative;
+    }
+
+    .hp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #4CAF50, #8BC34A);
+      transition: width 0.3s ease;
+      border-radius: 10px;
+    }
+
+    .player-hp .hp-fill {
+      background: linear-gradient(90deg, #f44336, #e91e63);
+    }
+
+    .hp-text {
+      position: absolute;
+      width: 100%;
+      text-align: center;
+      line-height: 18px;
+      color: #fff;
+      font-weight: bold;
+      font-size: 11px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 8px;
+      font-weight: bold;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+      transition: transform 0.1s;
+    }
+
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-attack {
+      background: linear-gradient(135deg, #ff5555, #ff3333) !important;
+      color: #fff !important;
+    }
+
+    .btn-special {
+      background: linear-gradient(135deg, #9C27B0, #7B1FA2) !important;
+      color: #fff !important;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #FFD700, #FFA000) !important;
+      color: #000 !important;
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #4CAF50, #388E3C) !important;
+      color: #fff !important;
+    }
+
+    .building {
+      background: #f5f5f5 !important;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      border: 2px solid #e0e0e0;
+    }
+
+    .building-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .building-title {
+      font-size: 15px;
+      color: #000 !important;
+      font-weight: 600;
+    }
+
+    .building-level {
+      background: #FFD700 !important;
+      color: #000 !important;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .building-desc {
+      font-size: 12px;
+      color: #555 !important;
+      margin-bottom: 6px;
+    }
+
+    .building-cost {
+      font-size: 13px;
+      margin-bottom: 6px;
+      color: #000 !important;
+      font-weight: 600;
+    }
+
+    .btn-upgrade {
+      background: linear-gradient(135deg, #4CAF50, #388E3C) !important;
+      color: #fff !important;
+      padding: 8px;
+      font-size: 14px;
+    }
+
+    .quest-item, .shop-item, .achievement, .leaderboard-item {
+      background: #f5f5f5;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+
+    .quest-item {
+      border-left: 4px solid #FFD700;
+    }
+
+    .quest-title, .shop-name, .achievement-name, .leaderboard-name {
+      font-weight: bold;
+      margin-bottom: 4px;
+      color: #000 !important;
+    }
+
+    .quest-progress, .shop-desc, .achievement-desc {
+      font-size: 12px;
+      color: #666 !important;
+      margin-bottom: 4px;
+    }
+
+    .quest-reward {
+      color: #4CAF50 !important;
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+    .shop-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: transform 0.2s;
+      border: 2px solid #e0e0e0;
+    }
+
+    .shop-item:active { transform: scale(0.98); }
+
+    .shop-info { flex: 1; }
+
+    .shop-price {
+      background: #FFD700;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-weight: bold;
+      color: #000 !important;
+      font-size: 13px;
+    }
+
+    .achievement {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 2px solid #e0e0e0;
+    }
+
+    .achievement.unlocked {
+      background: linear-gradient(135deg, #FFD700, #FFA000);
+      border-color: #FFD700;
+    }
+
+    .achievement-icon { font-size: 28px; }
+    .achievement-info { flex: 1; }
+
+    .leaderboard-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 2px solid #e0e0e0;
+    }
+
+    .leaderboard-rank {
+      font-size: 18px;
+      font-weight: bold;
+      color: #FFD700 !important;
+      width: 35px;
+    }
+
+    .leaderboard-score {
+      font-weight: bold;
+      color: #4CAF50 !important;
+    }
+
+    .message {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.9) !important;
+      color: #FFD700 !important;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: bold;
+      z-index: 1000;
+      animation: slideDown 0.3s ease;
+      max-width: 90%;
+    }
+
+    @keyframes slideDown {
+      from { top: -100px; opacity: 0; }
+      to { top: 20px; opacity: 1; }
+    }
+
+    .damage-number {
+      position: absolute;
+      font-size: 22px;
+      font-weight: bold;
+      color: #fff;
+      animation: floatUp 1s ease-out forwards;
+      pointer-events: none;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    }
+
+    .damage-number.crit {
+      color: #FFD700;
+      font-size: 28px;
+      text-shadow: 0 0 10px #FFD700;
+    }
+
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-60px) scale(1.2); }
+    }
+
+    .skill-tree {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .skill-card {
+      background: #f5f5f5;
+      padding: 10px;
+      border-radius: 10px;
+      text-align: center;
+      border: 2px solid #e0e0e0;
+      cursor: pointer;
+    }
+
+    .skill-card.unlocked {
+      background: linear-gradient(135deg, #4CAF50, #388E3C);
+      border-color: #4CAF50;
+      color: #fff !important;
+    }
+
+    .skill-card.locked {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .skill-icon { font-size: 32px; margin-bottom: 5px; }
+    .skill-name { font-size: 12px; font-weight: bold; }
+
+    .inventory-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+
+    .inventory-slot {
+      aspect-ratio: 1;
+      background: #f5f5f5;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .inventory-slot.filled {
+      background: linear-gradient(135deg, #FFD700, #FFA000);
+      border-color: #FFD700;
+    }
+
+    .inventory-slot:active { transform: scale(0.95); }
+
+    .boss-health {
+      background: linear-gradient(135deg, #9C27B0, #7B1FA2);
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      color: #fff !important;
+    }
+
+    .boss-name {
+      font-size: 22px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 8px;
+      color: #fff !important;
+    }
+
+    .boss-phase {
+      text-align: center;
+      font-size: 12px;
+      color: #E1BEE7 !important;
+      margin-bottom: 8px;
+    }
+
+    .class-select {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .class-card {
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+      border: 3px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .class-card.selected {
+      border-color: #FFD700;
+      background: #FFF8DC;
+    }
+
+    .class-icon { font-size: 36px; margin-bottom: 5px; }
+    .class-name { font-weight: bold; color: #000 !important; font-size: 13px; }
+  </style>
 </head>
 <body>
 
@@ -22,6 +544,9 @@
 
   <div class="tabs">
     <button class="tab active" onclick="switchTab('arena')">⚔️ Арена</button>
+    <button class="tab" onclick="switchTab('class')">🎭 Клас</button>
+    <button class="tab" onclick="switchTab('skills')">🌟 Навички</button>
+    <button class="tab" onclick="switchTab('inventory')">🎒 Інвентар</button>
     <button class="tab" onclick="switchTab('city')">🏰 Місто</button>
     <button class="tab" onclick="switchTab('shop')">🛒 Магазин</button>
     <button class="tab" onclick="switchTab('quests')">📜 Квести</button>
@@ -31,34 +556,18 @@
 
   <!-- АРЕНА -->
   <div id="arena" class="screen active">
-    <div class="location-select">
-      <div class="location-card active" onclick="changeLocation(0)">
-        <div class="location-icon">🌲</div>
-        <div class="location-name">Ліс</div>
-      </div>
-      <div class="location-card" onclick="changeLocation(1)">
-        <div class="location-icon">⛰️</div>
-        <div class="location-name">Гори</div>
-      </div>
-      <div class="location-card" onclick="changeLocation(2)">
-        <div class="location-icon">🏰</div>
-        <div class="location-name">Замок</div>
-      </div>
-      <div class="location-card" onclick="changeLocation(3)">
-        <div class="location-icon">🔥</div>
-        <div class="location-name">Пекло</div>
-      </div>
-    </div>
+    <div class="location-select" id="locationSelect"></div>
 
     <div class="player-hp">
       <div class="player-hp-text">❤️ Ваше здоров'я</div>
       <div class="hp-bar">
         <div class="hp-fill" id="playerHpBar" style="width: 100%;"></div>
-        <div class="hp-text"><span id="playerHp">100</span>/100</div>
+        <div class="hp-text"><span id="playerHp">100</span>/<span id="playerMaxHp">100</span></div>
       </div>
     </div>
 
     <div class="enemy-card" id="enemyCard">
+      <div class="enemy-image" id="enemyImage">👹</div>
       <div class="enemy-name" id="enemyName">Загарбник</div>
       <div class="enemy-level" id="enemyLevel">Рівень 1</div>
       <div class="hp-bar">
@@ -67,96 +576,60 @@
       </div>
     </div>
 
-    <button class="btn btn-attack" onclick="attack()" id="attackBtn">⚔️ Атака (<span id="damage">1</span>)</button>
-    <button class="btn btn-special" onclick="specialAttack()" id="specialBtn">💥 Критичний удар (3⚡)</button>
+    <button class="btn btn-attack" onclick="attack()" id="attackBtn">⚔️ Атака (<span id="damage">1</span> шкоди)</button>
+    <button class="btn btn-special" onclick="specialAttack()" id="specialBtn">💥 Критудар (3⚡, x3 урон)</button>
+    <button class="btn btn-success" onclick="usePotion()" id="potionBtn" style="display:none;">🧪 Зілля (❤️+50)</button>
+  </div>
+
+  <!-- КЛАС -->
+  <div id="class" class="screen">
+    <h3 style="margin-bottom:15px;color:#000;text-align:center;">Обери свій клас</h3>
+    <div class="class-select" id="classSelect"></div>
+    <div style="background:#f5f5f5;padding:15px;border-radius:10px;margin-top:10px;">
+      <div style="font-weight:bold;margin-bottom:8px;color:#000;" id="classInfo">Обери клас щоб побачити бонуси</div>
+    </div>
+  </div>
+
+  <!-- НАВИЧКИ -->
+  <div id="skills" class="screen">
+    <h3 style="margin-bottom:10px;color:#000;">Дерево навичок</h3>
+    <div style="background:#FFF8DC;padding:10px;border-radius:8px;margin-bottom:12px;font-size:13px;color:#000;">
+      💎 Очки навичок: <strong id="skillPoints">0</strong>
+    </div>
+    <div class="skill-tree" id="skillTree"></div>
+  </div>
+
+  <!-- ІНВЕНТАР -->
+  <div id="inventory" class="screen">
+    <h3 style="margin-bottom:10px;color:#000;">Твій інвентар</h3>
+    <div class="inventory-grid" id="inventoryGrid"></div>
+    <div style="background:#f5f5f5;padding:12px;border-radius:10px;">
+      <h4 style="margin-bottom:8px;color:#000;">Екіпіровка</h4>
+      <div style="display:flex;gap:10px;justify-content:space-around;">
+        <div style="text-align:center;">
+          <div style="font-size:11px;color:#666;margin-bottom:4px;">Зброя</div>
+          <div style="width:60px;height:60px;background:#e0e0e0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:32px;" id="weaponSlot">⚔️</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:11px;color:#666;margin-bottom:4px;">Броня</div>
+          <div style="width:60px;height:60px;background:#e0e0e0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:32px;" id="armorSlot">🛡️</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:11px;color:#666;margin-bottom:4px;">Аксесуар</div>
+          <div style="width:60px;height:60px;background:#e0e0e0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:32px;" id="accessorySlot">💍</div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- МІСТО -->
-  <div id="city" class="screen">
-    <div class="building">
-      <div class="building-header">
-        <div class="building-title">⚔️ Кузня</div>
-        <div class="building-level">Рівень <span id="forgeLevel">1</span></div>
-      </div>
-      <div class="building-desc">+1 до сили атаки</div>
-      <div class="building-cost">💰 <span id="forgeCost">50</span></div>
-      <button class="btn btn-upgrade" onclick="upgradeBuilding('forge')" id="forgeBtn">Покращити</button>
-    </div>
-
-    <div class="building">
-      <div class="building-header">
-        <div class="building-title">💰 Скарбниця</div>
-        <div class="building-level">Рівень <span id="treasuryLevel">1</span></div>
-      </div>
-      <div class="building-desc">+10 золота за перемогу</div>
-      <div class="building-cost">💰 <span id="treasuryCost">100</span></div>
-      <button class="btn btn-upgrade" onclick="upgradeBuilding('treasury')" id="treasuryBtn">Покращити</button>
-    </div>
-
-    <div class="building">
-      <div class="building-header">
-        <div class="building-title">🏰 Фортеця</div>
-        <div class="building-level">Рівень <span id="fortressLevel">1</span></div>
-      </div>
-      <div class="building-desc">Відкриває нових ворогів</div>
-      <div class="building-cost">💰 <span id="fortressCost">200</span></div>
-      <button class="btn btn-upgrade" onclick="upgradeBuilding('fortress')" id="fortressBtn">Покращити</button>
-    </div>
-
-    <div class="building">
-      <div class="building-header">
-        <div class="building-title">❤️ Госпіталь</div>
-        <div class="building-level">Рівень <span id="hospitalLevel">1</span></div>
-      </div>
-      <div class="building-desc">+20 макс. здоров'я</div>
-      <div class="building-cost">💰 <span id="hospitalCost">150</span></div>
-      <button class="btn btn-upgrade" onclick="upgradeBuilding('hospital')" id="hospitalBtn">Покращити</button>
-    </div>
-
-    <div class="building">
-      <div class="building-header">
-        <div class="building-title">⚡ Генератор</div>
-        <div class="building-level">Рівень <span id="generatorLevel">1</span></div>
-      </div>
-      <div class="building-desc">+2 макс. енергії</div>
-      <div class="building-cost">💰 <span id="generatorCost">250</span></div>
-      <button class="btn btn-upgrade" onclick="upgradeBuilding('generator')" id="generatorBtn">Покращити</button>
-    </div>
+  <div id="city" class="screen" style="padding:12px;">
+    <div id="buildingsList"></div>
   </div>
 
   <!-- МАГАЗИН -->
   <div id="shop" class="screen">
-    <div class="shop-item" onclick="buyItem('health')">
-      <div class="shop-info">
-        <div class="shop-name">❤️ Аптечка</div>
-        <div class="shop-desc">Відновлює 50 HP</div>
-      </div>
-      <div class="shop-price">50💰</div>
-    </div>
-
-    <div class="shop-item" onclick="buyItem('energy')">
-      <div class="shop-info">
-        <div class="shop-name">⚡ Енергетик</div>
-        <div class="shop-desc">+5 енергії</div>
-      </div>
-      <div class="shop-price">100💰</div>
-    </div>
-
-    <div class="shop-item" onclick="buyItem('damage')">
-      <div class="shop-info">
-        <div class="shop-name">⚔️ Меч</div>
-        <div class="shop-desc">+5 сили назавжди</div>
-      </div>
-      <div class="shop-price">500💰</div>
-    </div>
-
-    <div class="shop-item" onclick="buyItem('armor')">
-      <div class="shop-info">
-        <div class="shop-name">🛡️ Броня</div>
-        <div class="shop-desc">+50 макс. HP назавжди</div>
-      </div>
-      <div class="shop-price">800💰</div>
-    </div>
+    <div id="shopItems"></div>
   </div>
 
   <!-- КВЕСТИ -->
@@ -172,7 +645,7 @@
   <!-- РЕЙТИНГ -->
   <div id="leaderboard" class="screen">
     <div id="leaderboardList"></div>
-    <button class="btn btn-primary" onclick="loadLeaderboard()" style="margin-top: 15px;">🔄 Оновити</button>
+    <button class="btn btn-primary" onclick="loadLeaderboard()" style="margin-top:12px;">🔄 Оновити</button>
   </div>
 </div>
 
