@@ -677,4 +677,337 @@ function renderShop() {
 
 function buyItem(itemKey) {
   const item = items[itemKey];
-  if (gameData.gold < item.price)
+  if (gameData.gold < item.price) return;
+  
+  gameData.gold -= item.price;
+  gameData.inventory.push(itemKey);
+  
+  haptic('medium');
+  renderShop();
+  renderInventory();
+  updateUI();
+  saveGame();
+}
+
+// Квести
+function renderQuests() {
+  if (gameData.quests.length === 0) {
+    gameData.quests = questTemplates.map(q => ({ ...q, progress: 0, completed: false }));
+  }
+  
+  const container = document.getElementById('questsList');
+  container.innerHTML = gameData.quests.map((quest, idx) => `
+    <div class="quest-card ${quest.completed ? 'completed' : ''}">
+      <div class="quest-desc">📜 ${quest.desc}</div>
+      <div class="quest-progress">
+        ${quest.type === 'kill' ? `Прогрес: ${Math.min(gameData.wins, quest.target)}/${quest.target}` :
+          quest.type === 'gold' ? `Прогрес: ${Math.min(gameData.gold, quest.target)}/${quest.target}` :
+          `Прогрес: ${Math.min(gameData.level, quest.target)}/${quest.target}`}
+      </div>
+      ${quest.completed ? 
+        '<div style="color:#4CAF50;font-weight:bold;">✓ Завершено</div>' :
+        `<button class="btn btn-success btn-sm" onclick="claimQuest(${idx})" 
+                ${!isQuestComplete(quest) ? 'disabled' : ''}>
+          Отримати ${quest.reward}💰
+        </button>`}
+    </div>
+  `).join('');
+}
+
+function isQuestComplete(quest) {
+  if (quest.type === 'kill') return gameData.wins >= quest.target;
+  if (quest.type === 'gold') return gameData.gold >= quest.target;
+  if (quest.type === 'level') return gameData.level >= quest.target;
+  return false;
+}
+
+function claimQuest(idx) {
+  const quest = gameData.quests[idx];
+  if (quest.completed || !isQuestComplete(quest)) return;
+  
+  quest.completed = true;
+  gameData.gold += quest.reward;
+  
+  haptic('heavy');
+  renderQuests();
+  updateUI();
+  saveGame();
+}
+
+// Досягнення
+function renderAchievements() {
+  if (gameData.achievements.length === 0) {
+    gameData.achievements = achievementTemplates.map(a => ({ ...a, claimed: false }));
+  }
+  
+  const container = document.getElementById('achievementsList');
+  container.innerHTML = gameData.achievements.map((ach, idx) => {
+    const complete = ach.condition();
+    return `
+      <div class="achievement-card ${ach.claimed ? 'completed' : complete ? 'available' : ''}">
+        <div class="achievement-icon">${ach.claimed ? '✓' : complete ? '🏅' : '🔒'}</div>
+        <div class="achievement-desc">${ach.desc}</div>
+        ${ach.claimed ? 
+          '<div style="color:#4CAF50;font-weight:bold;">Отримано</div>' :
+          complete ?
+          `<button class="btn btn-success btn-sm" onclick="claimAchievement(${idx})">
+            Отримати ${ach.reward}💰
+          </button>` :
+          '<div style="color:#999;">Заблоковано</div>'}
+      </div>
+    `;
+  }).join('');
+}
+
+function claimAchievement(idx) {
+  const ach = gameData.achievements[idx];
+  if (ach.claimed || !ach.condition()) return;
+  
+  ach.claimed = true;
+  gameData.gold += ach.reward;
+  
+  haptic('heavy');
+  renderAchievements();
+  updateUI();
+  saveGame();
+}
+
+function checkQuestsAndAchievements() {
+  renderQuests();
+  renderAchievements();
+}
+
+// PvP
+function renderPvPOpponents() {
+  const container = document.getElementById('pvpOpponentsList');
+  
+  // Генеруємо фейкових опонентів
+  const opponents = [];
+  for (let i = 0; i < 5; i++) {
+    const ratingDiff = Math.floor(Math.random() * 200) - 100;
+    const opponentRating = gameData.pvpRating + ratingDiff;
+    const opponentPower = Math.max(1, Math.floor(opponentRating / 100));
+    
+    opponents.push({
+      name: `Козак ${Math.floor(Math.random() * 1000)}`,
+      rating: Math.max(800, opponentRating),
+      power: opponentPower,
+      emoji: ['⚔️', '🛡️', '🗡️', '🏹', '⚡'][Math.floor(Math.random() * 5)]
+    });
+  }
+  
+  container.innerHTML = opponents.map((opp, idx) => `
+    <div class="pvp-opponent">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="font-size:32px;">${opp.emoji}</div>
+        <div>
+          <div style="font-weight:bold;color:#000;">${opp.name}</div>
+          <div style="font-size:12px;color:#666;">Рейтинг: ${opp.rating} | Сила: ${opp.power}</div>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="startPvP(${idx}, ${opp.power}, ${opp.rating})">
+        Битва
+      </button>
+    </div>
+  `).join('');
+}
+
+function startPvP(idx, opponentPower, opponentRating) {
+  haptic('heavy');
+  
+  const myPower = getTotalPower();
+  const winChance = myPower / (myPower + opponentPower);
+  const won = Math.random() < winChance;
+  
+  if (won) {
+    gameData.pvpWins++;
+    gameData.pvpRating += 10;
+    gameData.gold += 50;
+    playSound('Victory');
+    alert('🏆 Перемога в PvP! +50💰, +10 рейтингу');
+  } else {
+    gameData.pvpLosses++;
+    gameData.pvpRating = Math.max(800, gameData.pvpRating - 5);
+    playSound('Defeat');
+    alert('😔 Поразка в PvP. -5 рейтингу');
+  }
+  
+  updateUI();
+  renderPvPOpponents();
+  saveGame();
+}
+
+// Лутбокси
+function renderLootboxes() {
+  const container = document.getElementById('lootboxList');
+  
+  container.innerHTML = lootboxes.map(box => `
+    <div class="lootbox-card">
+      <div class="lootbox-icon">${box.emoji}</div>
+      <div>
+        <div class="lootbox-name">${box.name}</div>
+        <div class="lootbox-desc" style="font-size:12px;color:#666;margin-top:4px;">
+          Можливі нагороди:<br>
+          💰 Золото, 🧪 Зілля, ⚔️ Предмети
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="openLootbox('${box.id}')"
+              ${gameData.gold < box.price ? 'disabled' : ''}>
+        ${box.price}💰
+      </button>
+    </div>
+  `).join('');
+}
+
+function openLootbox(boxId) {
+  const box = lootboxes.find(b => b.id === boxId);
+  if (!box || gameData.gold < box.price) return;
+  
+  gameData.gold -= box.price;
+  gameData.lootboxesOpened++;
+  
+  haptic('heavy');
+  
+  // Визначаємо нагороду
+  const rand = Math.random();
+  let cumulativeChance = 0;
+  let reward = null;
+  
+  for (const r of box.rewards) {
+    cumulativeChance += r.chance;
+    if (rand <= cumulativeChance) {
+      reward = r;
+      break;
+    }
+  }
+  
+  if (!reward) reward = box.rewards[0];
+  
+  // Видаємо нагороду
+  let rewardText = '';
+  
+  if (reward.type === 'gold') {
+    const amount = Math.floor(Math.random() * (reward.max - reward.min + 1)) + reward.min;
+    gameData.gold += amount;
+    rewardText = `💰 ${amount} золота`;
+  } else if (reward.type === 'potion') {
+    gameData.potions += reward.count;
+    rewardText = `🧪 ${reward.count} зілля`;
+  } else if (reward.type === 'item') {
+    const item = reward.items[Math.floor(Math.random() * reward.items.length)];
+    gameData.inventory.push(item);
+    rewardText = `⚔️ ${items[item].name}`;
+  } else if (reward.type === 'skillpoint') {
+    gameData.skillPoints += reward.count;
+    rewardText = `💎 ${reward.count} очко навичок`;
+  }
+  
+  playSound('Victory');
+  alert(`🎁 Відкрито лутбокс!\nОтримано: ${rewardText}`);
+  
+  updateUI();
+  renderLootboxes();
+  renderInventory();
+  renderSkills();
+  saveGame();
+}
+
+// Щоденні бонуси
+function checkDailyBonus() {
+  const today = new Date().toDateString();
+  
+  if (gameData.lastDailyBonus !== today) {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    if (gameData.lastDailyBonus === yesterday.toDateString()) {
+      gameData.dailyStreak++;
+    } else {
+      gameData.dailyStreak = 1;
+    }
+    
+    gameData.lastDailyBonus = today;
+    
+    const bonus = 50 + (gameData.dailyStreak * 10);
+    gameData.gold += bonus;
+    
+    haptic('heavy');
+    alert(`🎁 Щоденний бонус!\n+${bonus}💰\nСерія днів: ${gameData.dailyStreak}`);
+    
+    updateUI();
+    saveGame();
+  }
+}
+
+// Рейтинг
+function loadLeaderboard() {
+  const container = document.getElementById('leaderboardList');
+  
+  // Генеруємо фейковий рейтинг
+  const players = [];
+  
+  for (let i = 0; i < 20; i++) {
+    const player = {
+      name: `Козак ${Math.floor(Math.random() * 10000)}`,
+      wins: 0,
+      gold: 0,
+      pvpRating: 0
+    };
+    
+    if (currentLeaderboardTab === 'wins') {
+      player.wins = Math.floor(Math.random() * 500) + 100;
+    } else if (currentLeaderboardTab === 'gold') {
+      player.gold = Math.floor(Math.random() * 10000) + 1000;
+    } else {
+      player.pvpRating = Math.floor(Math.random() * 2000) + 1000;
+    }
+    
+    players.push(player);
+  }
+  
+  // Додаємо гравця
+  players.push({
+    name: tg.initDataUnsafe?.user?.first_name || 'Ви',
+    wins: gameData.wins,
+    gold: gameData.gold,
+    pvpRating: gameData.pvpRating,
+    isPlayer: true
+  });
+  
+  // Сортуємо
+  if (currentLeaderboardTab === 'wins') {
+    players.sort((a, b) => b.wins - a.wins);
+  } else if (currentLeaderboardTab === 'gold') {
+    players.sort((a, b) => b.gold - a.gold);
+  } else {
+    players.sort((a, b) => b.pvpRating - a.pvpRating);
+  }
+  
+  container.innerHTML = players.slice(0, 20).map((player, idx) => `
+    <div class="leaderboard-item ${player.isPlayer ? 'player-row' : ''}">
+      <div class="leaderboard-rank">${idx + 1}</div>
+      <div class="leaderboard-name">${player.name}${player.isPlayer ? ' (Ви)' : ''}</div>
+      <div class="leaderboard-score">
+        ${currentLeaderboardTab === 'wins' ? `🏆 ${player.wins}` :
+          currentLeaderboardTab === 'gold' ? `💰 ${player.gold}` :
+          `⚔️ ${player.pvpRating}`}
+      </div>
+    </div>
+  `).join('');
+}
+
+// Збереження/завантаження
+function saveGame() {
+  localStorage.setItem('cossackGame', JSON.stringify(gameData));
+}
+
+function loadGame() {
+  const saved = localStorage.getItem('cossackGame');
+  if (saved) {
+    const loaded = JSON.parse(saved);
+    gameData = { ...gameData, ...loaded };
+  }
+}
+
+// Запуск
+init();
