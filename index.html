@@ -5,240 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Козацька Арена 🇺🇦</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  
-  <style>
-    * { 
-      box-sizing: border-box; 
-      margin: 0; 
-      padding: 0; 
-    }
-
-    html, body {
-      background: linear-gradient(180deg, #4A90E2 0%, #FFE44D 100%) !important;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-      color: #000 !important;
-      min-height: 100vh;
-      padding: 10px;
-    }
-
-    .container {
-      max-width: 400px;
-      margin: 0 auto;
-    }
-
-    .header {
-      text-align: center;
-      padding: 15px;
-      background: #ffffff !important;
-      border-radius: 12px;
-      margin-bottom: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-
-    .header h1 {
-      font-size: 24px;
-      margin-bottom: 10px;
-      color: #000 !important;
-    }
-
-    .resources {
-      display: flex;
-      justify-content: space-around;
-      font-size: 18px;
-      color: #000 !important;
-    }
-
-    .resources div {
-      color: #000 !important;
-    }
-
-    .tabs {
-      display: flex;
-      gap: 5px;
-      margin-bottom: 10px;
-    }
-
-    .tab {
-      flex: 1;
-      padding: 12px;
-      background: #e8e8e8 !important;
-      border: none;
-      color: #000 !important;
-      font-size: 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 500;
-    }
-
-    .tab.active {
-      background: #FFD700 !important;
-      color: #000 !important;
-      font-weight: bold;
-    }
-
-    .screen {
-      display: none;
-      background: #ffffff !important;
-      padding: 20px;
-      border-radius: 12px;
-      min-height: 400px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-
-    .screen.active {
-      display: block;
-    }
-
-    .enemy-card {
-      background: linear-gradient(135deg, #ff6b6b, #ee5a6f) !important;
-      padding: 20px;
-      border-radius: 12px;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .enemy-name {
-      font-size: 22px;
-      margin-bottom: 10px;
-      color: #fff !important;
-      font-weight: bold;
-    }
-
-    .enemy-hp {
-      font-size: 28px;
-      color: #fff !important;
-      margin: 15px 0;
-      font-weight: bold;
-    }
-
-    .enemy-level {
-      font-size: 14px;
-      color: #ffe0b2 !important;
-    }
-
-    .btn {
-      width: 100%;
-      padding: 16px;
-      font-size: 20px;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      margin-top: 10px;
-      font-weight: bold;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    }
-
-    .btn-attack {
-      background: #ff5555 !important;
-      color: #fff !important;
-    }
-
-    .btn-primary {
-      background: #FFD700 !important;
-      color: #000 !important;
-    }
-
-    .building {
-      background: #f5f5f5 !important;
-      padding: 15px;
-      border-radius: 12px;
-      margin-bottom: 15px;
-      border: 1px solid #ddd;
-    }
-
-    .building-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-
-    .building-title {
-      font-size: 18px;
-      color: #000 !important;
-      font-weight: 600;
-    }
-
-    .building-level {
-      background: #FFD700 !important;
-      color: #000 !important;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 14px;
-      font-weight: bold;
-    }
-
-    .building-desc {
-      font-size: 14px;
-      color: #333 !important;
-      margin-bottom: 10px;
-    }
-
-    .building-cost {
-      font-size: 16px;
-      margin-bottom: 10px;
-      color: #000 !important;
-      font-weight: 500;
-    }
-
-    .btn-upgrade {
-      background: #5cb85c !important;
-      color: #fff !important;
-      padding: 10px;
-      font-size: 16px;
-    }
-
-    .btn-upgrade:disabled {
-      background: #ccc !important;
-      color: #666 !important;
-      cursor: not-allowed;
-    }
-
-    .stats-grid {
-      display: grid;
-      gap: 15px;
-    }
-
-    .stat-card {
-      background: #f5f5f5 !important;
-      padding: 15px;
-      border-radius: 12px;
-      text-align: center;
-      border: 1px solid #ddd;
-    }
-
-    .stat-value {
-      font-size: 32px;
-      font-weight: bold;
-      color: #f39c12 !important;
-      margin: 10px 0;
-    }
-
-    .stat-label {
-      font-size: 14px;
-      color: #333 !important;
-    }
-
-    .message {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.9) !important;
-      color: #FFD700 !important;
-      padding: 15px 30px;
-      border-radius: 12px;
-      font-size: 18px;
-      font-weight: bold;
-      z-index: 1000;
-      animation: slideDown 0.3s ease;
-    }
-
-    @keyframes slideDown {
-      from { top: -100px; opacity: 0; }
-      to { top: 20px; opacity: 1; }
-    }
-  </style>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
@@ -246,35 +13,73 @@
   <div class="header">
     <h1>⚔️ Козацька Арена</h1>
     <div class="resources">
-      <div>🏆 <span id="wins">0</span></div>
-      <div>💰 <span id="gold">0</span></div>
-      <div>⚡ Сила: <span id="power">1</span></div>
+      <div class="resource-item">🏆 <span id="wins">0</span></div>
+      <div class="resource-item">💰 <span id="gold">0</span></div>
+      <div class="resource-item">⚡ <span id="energy">10/10</span></div>
+      <div class="resource-item">💪 <span id="power">1</span></div>
     </div>
   </div>
 
   <div class="tabs">
     <button class="tab active" onclick="switchTab('arena')">⚔️ Арена</button>
     <button class="tab" onclick="switchTab('city')">🏰 Місто</button>
-    <button class="tab" onclick="switchTab('stats')">📊 Статистика</button>
+    <button class="tab" onclick="switchTab('shop')">🛒 Магазин</button>
+    <button class="tab" onclick="switchTab('quests')">📜 Квести</button>
+    <button class="tab" onclick="switchTab('achievements')">🏅 Досягнення</button>
+    <button class="tab" onclick="switchTab('leaderboard')">🏆 Рейтинг</button>
   </div>
 
+  <!-- АРЕНА -->
   <div id="arena" class="screen active">
-    <div class="enemy-card">
+    <div class="location-select">
+      <div class="location-card active" onclick="changeLocation(0)">
+        <div class="location-icon">🌲</div>
+        <div class="location-name">Ліс</div>
+      </div>
+      <div class="location-card" onclick="changeLocation(1)">
+        <div class="location-icon">⛰️</div>
+        <div class="location-name">Гори</div>
+      </div>
+      <div class="location-card" onclick="changeLocation(2)">
+        <div class="location-icon">🏰</div>
+        <div class="location-name">Замок</div>
+      </div>
+      <div class="location-card" onclick="changeLocation(3)">
+        <div class="location-icon">🔥</div>
+        <div class="location-name">Пекло</div>
+      </div>
+    </div>
+
+    <div class="player-hp">
+      <div class="player-hp-text">❤️ Ваше здоров'я</div>
+      <div class="hp-bar">
+        <div class="hp-fill" id="playerHpBar" style="width: 100%;"></div>
+        <div class="hp-text"><span id="playerHp">100</span>/100</div>
+      </div>
+    </div>
+
+    <div class="enemy-card" id="enemyCard">
       <div class="enemy-name" id="enemyName">Загарбник</div>
       <div class="enemy-level" id="enemyLevel">Рівень 1</div>
-      <div class="enemy-hp">❤️ <span id="enemyHp">20</span></div>
+      <div class="hp-bar">
+        <div class="hp-fill" id="enemyHpBar" style="width: 100%;"></div>
+        <div class="hp-text"><span id="enemyHp">20</span>/<span id="enemyMaxHp">20</span></div>
+      </div>
     </div>
-    <button class="btn btn-attack" onclick="attack()">⚔️ Удар (<span id="damage">1</span> шкоди)</button>
+
+    <button class="btn btn-attack" onclick="attack()" id="attackBtn">⚔️ Атака (<span id="damage">1</span>)</button>
+    <button class="btn btn-special" onclick="specialAttack()" id="specialBtn">💥 Критичний удар (3⚡)</button>
   </div>
 
+  <!-- МІСТО -->
   <div id="city" class="screen">
     <div class="building">
       <div class="building-header">
         <div class="building-title">⚔️ Кузня</div>
         <div class="building-level">Рівень <span id="forgeLevel">1</span></div>
       </div>
-      <div class="building-desc">Збільшує силу атаки на +1</div>
-      <div class="building-cost">💰 Вартість: <span id="forgeCost">50</span></div>
+      <div class="building-desc">+1 до сили атаки</div>
+      <div class="building-cost">💰 <span id="forgeCost">50</span></div>
       <button class="btn btn-upgrade" onclick="upgradeBuilding('forge')" id="forgeBtn">Покращити</button>
     </div>
 
@@ -284,7 +89,7 @@
         <div class="building-level">Рівень <span id="treasuryLevel">1</span></div>
       </div>
       <div class="building-desc">+10 золота за перемогу</div>
-      <div class="building-cost">💰 Вартість: <span id="treasuryCost">100</span></div>
+      <div class="building-cost">💰 <span id="treasuryCost">100</span></div>
       <button class="btn btn-upgrade" onclick="upgradeBuilding('treasury')" id="treasuryBtn">Покращити</button>
     </div>
 
@@ -293,212 +98,85 @@
         <div class="building-title">🏰 Фортеця</div>
         <div class="building-level">Рівень <span id="fortressLevel">1</span></div>
       </div>
-      <div class="building-desc">Відкриває сильніших ворогів</div>
-      <div class="building-cost">💰 Вартість: <span id="fortressCost">200</span></div>
+      <div class="building-desc">Відкриває нових ворогів</div>
+      <div class="building-cost">💰 <span id="fortressCost">200</span></div>
       <button class="btn btn-upgrade" onclick="upgradeBuilding('fortress')" id="fortressBtn">Покращити</button>
+    </div>
+
+    <div class="building">
+      <div class="building-header">
+        <div class="building-title">❤️ Госпіталь</div>
+        <div class="building-level">Рівень <span id="hospitalLevel">1</span></div>
+      </div>
+      <div class="building-desc">+20 макс. здоров'я</div>
+      <div class="building-cost">💰 <span id="hospitalCost">150</span></div>
+      <button class="btn btn-upgrade" onclick="upgradeBuilding('hospital')" id="hospitalBtn">Покращити</button>
+    </div>
+
+    <div class="building">
+      <div class="building-header">
+        <div class="building-title">⚡ Генератор</div>
+        <div class="building-level">Рівень <span id="generatorLevel">1</span></div>
+      </div>
+      <div class="building-desc">+2 макс. енергії</div>
+      <div class="building-cost">💰 <span id="generatorCost">250</span></div>
+      <button class="btn btn-upgrade" onclick="upgradeBuilding('generator')" id="generatorBtn">Покращити</button>
     </div>
   </div>
 
-  <div id="stats" class="screen">
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-label">Всього перемог</div>
-        <div class="stat-value" id="totalWins">0</div>
+  <!-- МАГАЗИН -->
+  <div id="shop" class="screen">
+    <div class="shop-item" onclick="buyItem('health')">
+      <div class="shop-info">
+        <div class="shop-name">❤️ Аптечка</div>
+        <div class="shop-desc">Відновлює 50 HP</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">Зароблено золота</div>
-        <div class="stat-value" id="totalGold">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Поточна сила</div>
-        <div class="stat-value" id="totalPower">1</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Найсильніший ворог</div>
-        <div class="stat-value" id="maxEnemy">1</div>
-      </div>
+      <div class="shop-price">50💰</div>
     </div>
-    <button class="btn btn-primary" onclick="resetProgress()" style="margin-top: 20px;">🔄 Скинути прогрес</button>
+
+    <div class="shop-item" onclick="buyItem('energy')">
+      <div class="shop-info">
+        <div class="shop-name">⚡ Енергетик</div>
+        <div class="shop-desc">+5 енергії</div>
+      </div>
+      <div class="shop-price">100💰</div>
+    </div>
+
+    <div class="shop-item" onclick="buyItem('damage')">
+      <div class="shop-info">
+        <div class="shop-name">⚔️ Меч</div>
+        <div class="shop-desc">+5 сили назавжди</div>
+      </div>
+      <div class="shop-price">500💰</div>
+    </div>
+
+    <div class="shop-item" onclick="buyItem('armor')">
+      <div class="shop-info">
+        <div class="shop-name">🛡️ Броня</div>
+        <div class="shop-desc">+50 макс. HP назавжди</div>
+      </div>
+      <div class="shop-price">800💰</div>
+    </div>
+  </div>
+
+  <!-- КВЕСТИ -->
+  <div id="quests" class="screen">
+    <div id="questsList"></div>
+  </div>
+
+  <!-- ДОСЯГНЕННЯ -->
+  <div id="achievements" class="screen">
+    <div id="achievementsList"></div>
+  </div>
+
+  <!-- РЕЙТИНГ -->
+  <div id="leaderboard" class="screen">
+    <div id="leaderboardList"></div>
+    <button class="btn btn-primary" onclick="loadLeaderboard()" style="margin-top: 15px;">🔄 Оновити</button>
   </div>
 </div>
 
-<script>
-  const tg = window.Telegram.WebApp;
-  tg.ready();
-  tg.expand();
-
-  const enemies = [
-    { name: "Загарбник", hp: 20, gold: 10, level: 1 },
-    { name: "Вояк", hp: 35, gold: 20, level: 2 },
-    { name: "Опричник", hp: 60, gold: 35, level: 3 },
-    { name: "Шляхтич", hp: 100, gold: 60, level: 4 },
-    { name: "Боярин", hp: 150, gold: 100, level: 5 },
-    { name: "Воєвода", hp: 250, gold: 180, level: 6 },
-    { name: "Генерал", hp: 400, gold: 300, level: 7 }
-  ];
-
-  let gameState = {
-    wins: 0,
-    gold: 0,
-    totalGold: 0,
-    power: 1,
-    currentEnemy: 0,
-    enemyHp: 20,
-    buildings: { forge: 1, treasury: 1, fortress: 1 }
-  };
-
-  function loadGame() {
-    if (tg.CloudStorage) {
-      tg.CloudStorage.getItem('gameState', (err, data) => {
-        if (data) {
-          gameState = JSON.parse(data);
-          spawnEnemy();
-          updateUI();
-        } else {
-          spawnEnemy();
-        }
-      });
-    } else {
-      const saved = localStorage.getItem('kozakGame');
-      if (saved) {
-        gameState = JSON.parse(saved);
-        spawnEnemy();
-      }
-      updateUI();
-    }
-  }
-
-  function saveGame() {
-    const data = JSON.stringify(gameState);
-    if (tg.CloudStorage) {
-      tg.CloudStorage.setItem('gameState', data);
-    } else {
-      localStorage.setItem('kozakGame', data);
-    }
-  }
-
-  function spawnEnemy() {
-    const maxLevel = Math.min(gameState.buildings.fortress, enemies.length - 1);
-    gameState.currentEnemy = Math.floor(Math.random() * (maxLevel + 1));
-    const enemy = enemies[gameState.currentEnemy];
-    gameState.enemyHp = enemy.hp;
-  }
-
-  function attack() {
-    gameState.enemyHp -= gameState.power;
-    tg.HapticFeedback.impactOccurred("medium");
-
-    if (gameState.enemyHp <= 0) {
-      const enemy = enemies[gameState.currentEnemy];
-      const goldReward = enemy.gold + (gameState.buildings.treasury - 1) * 10;
-      
-      gameState.wins++;
-      gameState.gold += goldReward;
-      gameState.totalGold += goldReward;
-
-      showMessage(`🏆 Перемога! +${goldReward} 💰`);
-      tg.HapticFeedback.notificationOccurred("success");
-
-      spawnEnemy();
-    }
-
-    updateUI();
-    saveGame();
-  }
-
-  function upgradeBuilding(type) {
-    const costs = {
-      forge: 50 * gameState.buildings.forge,
-      treasury: 100 * gameState.buildings.treasury,
-      fortress: 200 * gameState.buildings.fortress
-    };
-
-    const cost = costs[type];
-
-    if (gameState.gold >= cost) {
-      gameState.gold -= cost;
-      gameState.buildings[type]++;
-
-      if (type === 'forge') {
-        gameState.power = gameState.buildings.forge;
-      }
-
-      showMessage(`✅ Покращено!`);
-      tg.HapticFeedback.notificationOccurred("success");
-      updateUI();
-      saveGame();
-    } else {
-      showMessage(`❌ Не вистачає золота`);
-      tg.HapticFeedback.notificationOccurred("error");
-    }
-  }
-
-  function updateUI() {
-    const enemy = enemies[gameState.currentEnemy];
-
-    document.getElementById('wins').textContent = gameState.wins;
-    document.getElementById('gold').textContent = gameState.gold;
-    document.getElementById('power').textContent = gameState.power;
-    document.getElementById('damage').textContent = gameState.power;
-
-    document.getElementById('enemyName').textContent = enemy.name;
-    document.getElementById('enemyLevel').textContent = `Рівень ${enemy.level}`;
-    document.getElementById('enemyHp').textContent = gameState.enemyHp;
-
-    document.getElementById('forgeLevel').textContent = gameState.buildings.forge;
-    document.getElementById('forgeCost').textContent = 50 * gameState.buildings.forge;
-    document.getElementById('forgeBtn').disabled = gameState.gold < 50 * gameState.buildings.forge;
-
-    document.getElementById('treasuryLevel').textContent = gameState.buildings.treasury;
-    document.getElementById('treasuryCost').textContent = 100 * gameState.buildings.treasury;
-    document.getElementById('treasuryBtn').disabled = gameState.gold < 100 * gameState.buildings.treasury;
-
-    document.getElementById('fortressLevel').textContent = gameState.buildings.fortress;
-    document.getElementById('fortressCost').textContent = 200 * gameState.buildings.fortress;
-    document.getElementById('fortressBtn').disabled = gameState.gold < 200 * gameState.buildings.fortress || gameState.buildings.fortress >= enemies.length;
-
-    document.getElementById('totalWins').textContent = gameState.wins;
-    document.getElementById('totalGold').textContent = gameState.totalGold;
-    document.getElementById('totalPower').textContent = gameState.power;
-    document.getElementById('maxEnemy').textContent = Math.max(gameState.currentEnemy + 1, 1);
-  }
-
-  function switchTab(tab) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    
-    document.getElementById(tab).classList.add('active');
-    event.target.classList.add('active');
-  }
-
-  function showMessage(text) {
-    const msg = document.createElement('div');
-    msg.className = 'message';
-    msg.textContent = text;
-    document.body.appendChild(msg);
-    setTimeout(() => msg.remove(), 2000);
-  }
-
-  function resetProgress() {
-    if (confirm('Ви впевнені? Весь прогрес буде втрачено!')) {
-      gameState = {
-        wins: 0,
-        gold: 0,
-        totalGold: 0,
-        power: 1,
-        currentEnemy: 0,
-        enemyHp: 20,
-        buildings: { forge: 1, treasury: 1, fortress: 1 }
-      };
-      spawnEnemy();
-      updateUI();
-      saveGame();
-      showMessage('🔄 Прогрес скинуто');
-    }
-  }
-
-  loadGame();
-</script>
+<script src="js/game.js"></script>
 
 </body>
 </html>
