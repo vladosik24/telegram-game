@@ -1,13 +1,27 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="uk" data-theme="light" style="color-scheme: light;">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- БЛОКУВАННЯ ТЕМНОЇ ТЕМИ -->
+  <meta name="color-scheme" content="light only">
+  <meta name="theme-color" content="#4A90E2">
+  <style>
+    :root {
+      color-scheme: light only !important;
+    }
+    html, body {
+      color-scheme: light !important;
+      background: linear-gradient(180deg, #4A90E2 0%, #FFE44D 100%) !important;
+    }
+  </style>
+  
   <title>Козацька Арена 🇺🇦</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body data-theme="light" style="color-scheme: light;">
 
 <div class="container">
   <div class="header">
