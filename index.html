@@ -54,9 +54,9 @@
       </div>
     </div>
 
-    <button class="btn btn-attack" id="attackBtn">⚔️ Атака (<span id="damage">1</span> шкоди)</button>
-    <button class="btn btn-special" id="specialBtn">💥 Критудар (3⚡, x3 урон)</button>
-    <button class="btn btn-success" id="potionBtn" style="display:none;">🧪 Зілля (❤️+50)</button>
+    <button class="btn btn-attack" id="attackBtn" onclick="window.attack && window.attack()">⚔️ Атака (<span id="damage">1</span> шкоди)</button>
+<button class="btn btn-special" id="specialBtn" onclick="window.specialAttack && window.specialAttack()">💥 Критудар (3⚡, x3 урон)</button>
+<button class="btn btn-success" id="potionBtn" onclick="window.usePotion && window.usePotion()" style="display:none;">🧪 Зілля (❤️+50)</button>
   </div>
 
   <!-- КЛАС -->
