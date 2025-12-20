@@ -1468,16 +1468,21 @@ function updateUI() {
 // ПЕРЕМИКАННЯ ТАБІВ
 // ============================================
 function switchTab(tab) {
+  // Сховати всі екрани
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  
+  // Зняти active з усіх табів
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   
+  // Показати обраний екран
   const screen = document.getElementById(tab);
   if (screen) screen.classList.add('active');
   
-  if (event && event.target) {
-    event.target.classList.add('active');
-  }
+  // Активувати обраний таб
+  const tabBtn = document.getElementById('tab-' + tab);
+  if (tabBtn) tabBtn.classList.add('active');
 
+  // Спеціальні дії
   if (tab === 'leaderboard') loadLeaderboard();
   if (tab === 'inventory') updateEquipment();
 }
