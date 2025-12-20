@@ -5,6 +5,21 @@ const tg = window.Telegram.WebApp;
 tg.ready();
 tg.expand();
 
+// ІНІЦІАЛІЗАЦІЯ TELEGRAM
+const tg = window.Telegram.WebApp;
+tg.ready();
+tg.expand();
+
+// ФОРСУВАТИ СВІТЛУ ТЕМУ
+tg.setHeaderColor('#4A90E2');
+tg.setBackgroundColor('#4A90E2');
+
+// Блокувати темну тему на рівні DOM
+document.documentElement.style.colorScheme = 'light';
+document.documentElement.setAttribute('data-theme', 'light');
+document.body.style.colorScheme = 'light';
+
+
 // Глобальні функції для onclick
 window.attack = attack;
 window.specialAttack = specialAttack;
