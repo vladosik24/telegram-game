@@ -21,15 +21,15 @@
   </div>
 
   <div class="tabs">
-    <button class="tab active" id="tab-arena">⚔️ Арена</button>
-    <button class="tab" id="tab-class">🎭 Клас</button>
-    <button class="tab" id="tab-skills">🌟 Навички</button>
-    <button class="tab" id="tab-inventory">🎒 Інвентар</button>
-    <button class="tab" id="tab-city">🏰 Місто</button>
-    <button class="tab" id="tab-shop">🛒 Магазин</button>
-    <button class="tab" id="tab-quests">📜 Квести</button>
-    <button class="tab" id="tab-achievements">🏅 Досягнення</button>
-    <button class="tab" id="tab-leaderboard">🏆 Рейтинг</button>
+    <button class="tab active" onclick="switchTab('arena'); return false;">⚔️ Арена</button>
+    <button class="tab" onclick="switchTab('class'); return false;">🎭 Клас</button>
+    <button class="tab" onclick="switchTab('skills'); return false;">🌟 Навички</button>
+    <button class="tab" onclick="switchTab('inventory'); return false;">🎒 Інвентар</button>
+    <button class="tab" onclick="switchTab('city'); return false;">🏰 Місто</button>
+    <button class="tab" onclick="switchTab('shop'); return false;">🛒 Магазин</button>
+    <button class="tab" onclick="switchTab('quests'); return false;">📜 Квести</button>
+    <button class="tab" onclick="switchTab('achievements'); return false;">🏅 Досягнення</button>
+    <button class="tab" onclick="switchTab('leaderboard'); return false;">🏆 Рейтинг</button>
   </div>
 
   <!-- АРЕНА -->
@@ -54,9 +54,9 @@
       </div>
     </div>
 
-    <button class="btn btn-attack" id="attackBtn" onclick="window.attack && window.attack()">⚔️ Атака (<span id="damage">1</span> шкоди)</button>
-<button class="btn btn-special" id="specialBtn" onclick="window.specialAttack && window.specialAttack()">💥 Критудар (3⚡, x3 урон)</button>
-<button class="btn btn-success" id="potionBtn" onclick="window.usePotion && window.usePotion()" style="display:none;">🧪 Зілля (❤️+50)</button>
+    <button class="btn btn-attack" id="attackBtn" onclick="attack(); return false;">⚔️ Атака (<span id="damage">1</span> шкоди)</button>
+    <button class="btn btn-special" id="specialBtn" onclick="specialAttack(); return false;">💥 Критудар (3⚡, x3 урон)</button>
+    <button class="btn btn-success" id="potionBtn" style="display:none;" onclick="usePotion(); return false;">🧪 Зілля (❤️+50)</button>
   </div>
 
   <!-- КЛАС -->
@@ -101,7 +101,7 @@
   </div>
 
   <!-- МІСТО -->
-  <div id="city" class="screen" style="padding:12px;">
+  <div id="city" class="screen">
     <div id="buildingsList"></div>
   </div>
 
@@ -123,7 +123,7 @@
   <!-- РЕЙТИНГ -->
   <div id="leaderboard" class="screen">
     <div id="leaderboardList"></div>
-    <button class="btn btn-primary" id="refreshLeaderboardBtn" style="margin-top:12px;">🔄 Оновити</button>
+    <button class="btn btn-primary" onclick="loadLeaderboard(); return false;" style="margin-top:12px;">🔄 Оновити</button>
   </div>
 </div>
 
