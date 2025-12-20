@@ -1,3 +1,6 @@
+# 🎮 ПОВНИЙ js/game.js — ОСТАТОЧНА ВЕРСІЯ
+
+```javascript
 // ============================================
 // ІНІЦІАЛІЗАЦІЯ TELEGRAM
 // ============================================
@@ -300,156 +303,7 @@ let gameState = {
 };
 
 // ============================================
-// ЗАВАНТАЖЕННЯ ТА ЗБЕРЕЖЕННЯ
-// ============================================
-function loadGame() {
-  if (tg.CloudStorage) {
-    tg.CloudStorage.getItem('gameState', (err, data) => {
-      if (data) {
-        const loaded = JSON.parse(data);
-        gameState = { ...gameState, ...loaded };
-        initGame();
-      } else {
-        generateReferralCode();
-        initGame();
-      }
-    });
-  } else {
-    const saved = localStorage.getItem('kozakGame');
-    if (saved) {
-      const loaded = JSON.parse(saved);
-      gameState = { ...gameState, ...loaded };
-    } else {
-      generateReferralCode();
-    }
-    initGame();
-  }
-}
-
-function saveGame() {
-  const data = JSON.stringify(gameState);
-  if (tg.CloudStorage) {
-    tg.CloudStorage.setItem('gameState', data);
-    
-    // Рейтинг
-    const userId = tg.initDataUnsafe?.user?.id || 'guest_' + Math.random();
-    tg.CloudStorage.setItem('lb_' + userId, JSON.stringify({
-      name: tg.initDataUnsafe?.user?.first_name || 'Гравець',
-      score: gameState.wins,
-      gold: gameState.totalGold,
-      level: gameState.level
-    }));
-  } else {
-    localStorage.setItem('kozakGame', data);
-  }
-}
-
-function initGame() {
-  checkDailyReward();
-  regenerateEnergy();
-  spawnEnemy();
-  renderLocations();
-  renderClasses();
-  renderSkills();
-  renderInventory();
-  renderBuildings();
-  renderShop();
-  updateUI();
-  updateQuests();
-  updateAchievements();
-  
-  // Регенерація енергії
-  setInterval(regenerateEnergy, 60000);
-  
-  // Авторегенерація HP
-  setInterval(autoHeal, 30000);
-}
-
-// ============================================
-// СИСТЕМИ
-// ============================================
-
-// Щоденна нагорода
-function checkDailyReward() {
-  const now = Date.now();
-  const day = 24 * 60 * 60 * 1000;
-  if (now - gameState.lastDaily > day) {
-    gameState.lastDaily = now;
-    const reward = 100 + gameState.level * 50;
-    gameState.gold += reward;
-    gameState.energy = gameState.maxEnergy;
-    showMessage(`🎁 Щоденна нагорода: ${reward}💰 + повна енергія!`);
-    saveGame();
-  }
-}
-
-// Регенерація енергії
-function regenerateEnergy() {
-  const now = Date.now();
-  const minutesPassed = Math.floor((now - gameState.lastEnergyRegen) / 60000);
-  
-  if (minutesPassed > 0 && gameState.energy < gameState.maxEnergy) {
-    const regen = minutesPassed * (1 + getClassBonus('energyRegen'));
-    gameState.energy = Math.min(gameState.energy + regen, gameState.maxEnergy);
-    gameState.lastEnergyRegen = now;
-    updateUI();
-    saveGame();
-  }
-}
-
-// Авторегенерація HP
-function autoHeal() {
-  const healAmount = getSkillBonus('hpRegen');
-  if (healAmount > 0 && gameState.playerHp < gameState.getTotalMaxHP()) {
-    gameState.playerHp = Math.min(gameState.playerHp + healAmount, gameState.getTotalMaxHP());
-    updateUI();
-  }
-}
-
-// Додавання досвіду
-function addExp(amount) {
-  gameState.exp += amount;
-  
-  while (gameState.exp >= gameState.expToNext) {
-    gameState.exp -= gameState.expToNext;
-    gameState.level++;
-    gameState.skillPoints++;
-    gameState.expToNext = Math.floor(gameState.expToNext * 1.5);
-    
-    showMessage(`🌟 Новий рівень ${gameState.level}! +1 очко навичок`);
-    tg.HapticFeedback.notificationOccurred("success");
-  }
-  
-  updateUI();
-}
-
-// Реферальна система
-function generateReferralCode() {
-  const userId = tg.initDataUnsafe?.user?.id || Date.now();
-  gameState.referralCode = 'REF_' + userId.toString(36).toUpperCase();
-}
-
-function useReferralCode(code) {
-  if (gameState.referredBy) {
-    showMessage('❌ Ви вже використали реферальний код');
-    return;
-  }
-  
-  if (code === gameState.referralCode) {
-    showMessage('❌ Не можна використати свій код');
-    return;
-  }
-  
-  gameState.referredBy = code;
-  gameState.gold += 500;
-  showMessage('✅ Бонус за реферал: +500💰');
-  
-  // Тут можна додати логіку нагородження того хто запросив
-  saveGame();
-}
-
-// ============================================
-// ОБЧИСЛЕННЯ БОНУСІВ
+// МЕТОДИ GAMESTATE
 // ============================================
 
 // Загальний урон
@@ -559,6 +413,10 @@ gameState.getTotalSkillLevel = function() {
   return Object.values(this.skills).reduce((sum, level) => sum + level, 0);
 };
 
+// ============================================
+// БОНУСИ
+// ============================================
+
 // Бонуси класу
 function getClassBonus(type) {
   if (!gameState.playerClass) return 0;
@@ -581,6 +439,136 @@ function getSkillBonus(type) {
   });
   
   return bonus;
+}
+
+// ============================================
+// ЗАВАНТАЖЕННЯ ТА ЗБЕРЕЖЕННЯ
+// ============================================
+function loadGame() {
+  if (tg.CloudStorage) {
+    tg.CloudStorage.getItem('gameState', (err, data) => {
+      if (data) {
+        const loaded = JSON.parse(data);
+        Object.assign(gameState, loaded);
+        initGame();
+      } else {
+        generateReferralCode();
+        initGame();
+      }
+    });
+  } else {
+    const saved = localStorage.getItem('kozakGame');
+    if (saved) {
+      const loaded = JSON.parse(saved);
+      Object.assign(gameState, loaded);
+    } else {
+      generateReferralCode();
+    }
+    initGame();
+  }
+}
+
+function saveGame() {
+  const data = JSON.stringify(gameState);
+  if (tg.CloudStorage) {
+    tg.CloudStorage.setItem('gameState', data);
+    
+    // Рейтинг
+    const userId = tg.initDataUnsafe?.user?.id || 'guest_' + Math.random();
+    tg.CloudStorage.setItem('lb_' + userId, JSON.stringify({
+      name: tg.initDataUnsafe?.user?.first_name || 'Гравець',
+      score: gameState.wins,
+      gold: gameState.totalGold,
+      level: gameState.level
+    }));
+  } else {
+    localStorage.setItem('kozakGame', data);
+  }
+}
+
+function initGame() {
+  checkDailyReward();
+  regenerateEnergy();
+  spawnEnemy();
+  renderLocations();
+  renderClasses();
+  renderSkills();
+  renderInventory();
+  renderBuildings();
+  renderShop();
+  updateUI();
+  updateQuests();
+  updateAchievements();
+  
+  // Регенерація енергії
+  setInterval(regenerateEnergy, 60000);
+  
+  // Авторегенерація HP
+  setInterval(autoHeal, 30000);
+}
+
+// ============================================
+// СИСТЕМИ
+// ============================================
+
+// Щоденна нагорода
+function checkDailyReward() {
+  const now = Date.now();
+  const day = 24 * 60 * 60 * 1000;
+  if (now - gameState.lastDaily > day) {
+    gameState.lastDaily = now;
+    const reward = 100 + gameState.level * 50;
+    gameState.gold += reward;
+    gameState.energy = gameState.maxEnergy;
+    showMessage(`🎁 Щоденна нагорода: ${reward}💰 + повна енергія!`);
+    saveGame();
+  }
+}
+
+// Регенерація енергії
+function regenerateEnergy() {
+  const now = Date.now();
+  const minutesPassed = Math.floor((now - gameState.lastEnergyRegen) / 60000);
+  
+  if (minutesPassed > 0 && gameState.energy < gameState.maxEnergy) {
+    const regen = minutesPassed * (1 + getClassBonus('energyRegen'));
+    gameState.energy = Math.min(gameState.energy + regen, gameState.maxEnergy);
+    gameState.lastEnergyRegen = now;
+    updateUI();
+    saveGame();
+  }
+}
+
+// Авторегенерація HP
+function autoHeal() {
+  const healAmount = getSkillBonus('hpRegen');
+  if (healAmount > 0 && gameState.playerHp < gameState.getTotalMaxHP()) {
+    gameState.playerHp = Math.min(gameState.playerHp + healAmount, gameState.getTotalMaxHP());
+    updateUI();
+  }
+}
+
+// Додавання досвіду
+function addExp(amount) {
+  gameState.exp += amount;
+  
+  while (gameState.exp >= gameState.expToNext) {
+    gameState.exp -= gameState.expToNext;
+    gameState.level++;
+    gameState.skillPoints++;
+    gameState.expToNext = Math.floor(gameState.expToNext * 1.5);
+    
+    showMessage(`🌟 Новий рівень ${gameState.level}! +1 очко навичок`);
+    tg.HapticFeedback.notificationOccurred("success");
+  }
+  
+  updateUI();
+}
+
+// Реферальна система
+function generateReferralCode() {
+  const userId = tg.initDataUnsafe?.user?.id || Date.now();
+  gameState.referralCode = 'REF_' + userId.toString(36).toUpperCase();
 }
 
 // ============================================
@@ -734,6 +722,8 @@ function enemyAttack(enemy) {
 
 // Перевірка фази боса
 function checkBossPhase() {
+  if (!gameState.currentBoss || !gameState.currentBoss.phases) return;
+  
   const hpPercent = (gameState.enemyHp / gameState.enemyMaxHp) * 100;
   
   gameState.currentBoss.phases.forEach((phase, index) => {
@@ -748,8 +738,7 @@ function checkBossPhase() {
 // Перемога
 function handleVictory(enemy) {
   let goldReward = enemy.gold + (gameState.buildings.treasury - 1) * 10;
-  goldReward = Math.floor(goldReward * game```javascript
-State.getGoldBonus());
+  goldReward = Math.floor(goldReward * gameState.getGoldBonus());
   
   gameState.wins++;
   gameState.gold += goldReward;
@@ -889,7 +878,7 @@ function renderBuildings() {
       </div>
       <div class="building-desc">${building.desc}</div>
       <div class="building-cost">💰 ${cost}</div>
-      <button class="btn btn-upgrade" onclick="upgradeBuilding('${building.id}')" id="${building.id}Btn">Покращити</button>
+      <button class="btn btn-upgrade" onclick="upgradeBuilding('${building.id}')" ${gameState.gold < cost ? 'disabled' : ''}>Покращити</button>
     `;
     list.appendChild(div);
   });
@@ -905,7 +894,8 @@ function renderShop() {
   const shopItems = items.filter(item => {
     // Показуємо тільки якщо немає в інвентарі (крім витратних)
     if (item.stackable) return true;
-    return !gameState.inventory.some(inv => inv.id === item.id);
+    return !gameState.inventory.some(inv => inv.id === item.id) && 
+           !Object.values(gameState.equipped).includes(item.id);
   });
   
   shopItems.forEach(item => {
@@ -931,6 +921,9 @@ function getItemDescription(item) {
   if (item.defense) parts.push(`+${item.defense} захисту`);
   if (item.healAmount) parts.push(`+${item.healAmount} HP (витратне)`);
   if (item.energyAmount) parts.push(`+${item.energyAmount} енергії`);
+  if (item.goldBonus) parts.push(`+${Math.floor(item.goldBonus * 100)}% золота`);
+  if (item.hpRegen) parts.push(`+${item.hpRegen} регенерації`);
+  if (item.specialCost) parts.push(`${item.specialCost} вартість спецатаки`);
   return parts.join(', ') || 'Предмет';
 }
 
@@ -989,7 +982,7 @@ function renderInventory() {
       const invItem = gameState.inventory[i];
       const item = items.find(it => it.id === invItem.id);
       slot.classList.add('filled');
-      slot.innerHTML = item.emoji + (invItem.count > 1 ? `<div style="position:absolute;bottom:2px;right:2px;font-size:10px;background:rgba(0,0,0,0.7);padding:2px 4px;border-radius:3px;">${invItem.count}</div>` : '');
+      slot.innerHTML = item.emoji + (invItem.count > 1 ? `<div style="position:absolute;bottom:2px;right:2px;font-size:10px;background:rgba(0,0,0,0.7);padding:2px 4px;border-radius:3px;color:#fff;">${invItem.count}</div>` : '');
       slot.onclick = () => useItem(invItem.id);
     }
     
@@ -1001,7 +994,10 @@ function renderInventory() {
     const itemData = items.find(i => i.id === item.id);
     return itemData.type === 'consumable' && itemData.healAmount;
   });
-  document.getElementById('potionBtn').style.display = hasPotion ? 'block' : 'none';
+  const potionBtn = document.getElementById('potionBtn');
+  if (potionBtn) {
+    potionBtn.style.display = hasPotion ? 'block' : 'none';
+  }
 }
 
 function useItem(itemId) {
@@ -1061,15 +1057,19 @@ function updateEquipment() {
   // Оновити слоти екіпірування
   ['weapon', 'armor', 'accessory'].forEach(slot => {
     const slotEl = document.getElementById(slot + 'Slot');
+    if (!slotEl) return;
+    
     if (gameState.equipped[slot]) {
       const item = items.find(i => i.id === gameState.equipped[slot]);
       slotEl.textContent = item.emoji;
       slotEl.style.background = 'linear-gradient(135deg, #FFD700, #FFA000)';
       slotEl.onclick = () => unequipItem(slot);
+      slotEl.style.cursor = 'pointer';
     } else {
       slotEl.textContent = slot === 'weapon' ? '⚔️' : slot === 'armor' ? '🛡️' : '💍';
       slotEl.style.background = '#e0e0e0';
       slotEl.onclick = null;
+      slotEl.style.cursor = 'default';
     }
   });
 }
@@ -1098,6 +1098,8 @@ function unequipItem(slot) {
 // ============================================
 function renderClasses() {
   const container = document.getElementById('classSelect');
+  if (!container) return;
+  
   container.innerHTML = '';
   
   classes.forEach(cls => {
@@ -1134,6 +1136,8 @@ function selectClass(classId) {
 
 function updateClassInfo() {
   const info = document.getElementById('classInfo');
+  if (!info) return;
+  
   if (!gameState.playerClass) {
     info.textContent = 'Обери клас щоб побачити бонуси';
     return;
@@ -1155,6 +1159,8 @@ function updateClassInfo() {
 // ============================================
 function renderSkills() {
   const tree = document.getElementById('skillTree');
+  if (!tree) return;
+  
   tree.innerHTML = '';
   
   skills.forEach(skill => {
@@ -1177,7 +1183,10 @@ function renderSkills() {
     tree.appendChild(div);
   });
   
-  document.getElementById('skillPoints').textContent = gameState.skillPoints;
+  const skillPointsEl = document.getElementById('skillPoints');
+  if (skillPointsEl) {
+    skillPointsEl.textContent = gameState.skillPoints;
+  }
 }
 
 function canUnlockSkill(skill) {
@@ -1226,6 +1235,8 @@ function unlockSkill(skillId) {
 // ============================================
 function renderLocations() {
   const container = document.getElementById('locationSelect');
+  if (!container) return;
+  
   container.innerHTML = '';
   
   locations.forEach((loc, index) => {
@@ -1289,6 +1300,8 @@ function checkQuests() {
 
 function updateQuests() {
   const list = document.getElementById('questsList');
+  if (!list) return;
+  
   list.innerHTML = '';
 
   quests.forEach(quest => {
@@ -1335,6 +1348,8 @@ function checkAchievements() {
 
 function updateAchievements() {
   const list = document.getElementById('achievementsList');
+  if (!list) return;
+  
   list.innerHTML = '';
 
   achievements.forEach(ach => {
@@ -1358,10 +1373,11 @@ function updateAchievements() {
 // ============================================
 function loadLeaderboard() {
   const list = document.getElementById('leaderboardList');
+  if (!list) return;
+  
   list.innerHTML = '<div style="text-align:center;padding:20px;color:#666;">Завантаження...</div>';
 
-  if (tg.CloudStorage) {
-    // Спрощена версія - показуємо тільки поточного гравця
+  setTimeout(() => {
     const leaderboard = [
       { 
         rank: 1, 
@@ -1393,9 +1409,7 @@ function loadLeaderboard() {
       <div style="font-size:12px;color:#666;">Запрошено: ${gameState.referrals} | Отримано: ${gameState.referralRewards}💰</div>
     `;
     list.appendChild(refDiv);
-  } else {
-    list.innerHTML = '<div style="text-align:center;padding:20px;color:#666;">Рейтинг доступний тільки в Telegram</div>';
-  }
+  }, 500);
 }
 
 // ============================================
@@ -1405,31 +1419,52 @@ function updateUI() {
   const enemy = gameState.isBoss ? gameState.currentBoss : enemies[gameState.currentEnemy];
 
   // Ресурси
-  document.getElementById('wins').textContent = gameState.wins;
-  document.getElementById('gold').textContent = gameState.gold;
-  document.getElementById('energy').textContent = `${gameState.energy}/${gameState.maxEnergy}`;
-  document.getElementById('power').textContent = gameState.getTotalDamage();
-  document.getElementById('damage').textContent = gameState.getTotalDamage();
+  const winsEl = document.getElementById('wins');
+  const goldEl = document.getElementById('gold');
+  const energyEl = document.getElementById('energy');
+  const powerEl = document.getElementById('power');
+  const damageEl = document.getElementById('damage');
+  
+  if (winsEl) winsEl.textContent = gameState.wins;
+  if (goldEl) goldEl.textContent = gameState.gold;
+  if (energyEl) energyEl.textContent = `${gameState.energy}/${gameState.maxEnergy}`;
+  if (powerEl) powerEl.textContent = gameState.getTotalDamage();
+  if (damageEl) damageEl.textContent = gameState.getTotalDamage();
 
   // Гравець
   const playerHpPercent = (gameState.playerHp / gameState.getTotalMaxHP()) * 100;
-  document.getElementById('playerHp').textContent = Math.floor(gameState.playerHp);
-  document.getElementById('playerMaxHp').textContent = gameState.getTotalMaxHP();
-  document.getElementById('playerHpBar').style.width = Math.max(0, playerHpPercent) + '%';
+  const playerHpEl = document.getElementById('playerHp');
+  const playerMaxHpEl = document.getElementById('playerMaxHp');
+  const playerHpBarEl = document.getElementById('playerHpBar');
+  
+  if (playerHpEl) playerHpEl.textContent = Math.floor(gameState.playerHp);
+  if (playerMaxHpEl) playerMaxHpEl.textContent = gameState.getTotalMaxHP();
+  if (playerHpBarEl) playerHpBarEl.style.width = Math.max(0, playerHpPercent) + '%';
 
   // Ворог
-  document.getElementById('enemyName').textContent = enemy.name;
-  document.getElementById('enemyLevel').textContent = `Рівень ${enemy.level}${gameState.isBoss ? ' 👑 БОС' : ''}`;
-  document.getElementById('enemyHp').textContent = Math.max(0, Math.floor(gameState.enemyHp));
-  document.getElementById('enemyMaxHp').textContent = gameState.enemyMaxHp;
+  const enemyNameEl = document.getElementById('enemyName');
+  const enemyLevelEl = document.getElementById('enemyLevel');
+  const enemyHpEl = document.getElementById('enemyHp');
+  const enemyMaxHpEl = document.getElementById('enemyMaxHp');
+  const enemyHpBarEl = document.getElementById('enemyHpBar');
+  
+  if (enemyNameEl) enemyNameEl.textContent = enemy.name;
+  if (enemyLevelEl) enemyLevelEl.textContent = `Рівень ${enemy.level}${gameState.isBoss ? ' 👑 БОС' : ''}`;
+  if (enemyHpEl) enemyHpEl.textContent = Math.max(0, Math.floor(gameState.enemyHp));
+  if (enemyMaxHpEl) enemyMaxHpEl.textContent = gameState.enemyMaxHp;
   
   const enemyHpPercent = (gameState.enemyHp / gameState.enemyMaxHp) * 100;
-  document.getElementById('enemyHpBar').style.width = Math.max(0, enemyHpPercent) + '%';
+  if (enemyHpBarEl) enemyHpBarEl.style.width = Math.max(0, enemyHpPercent) + '%';
 
   // Кнопки
-  document.getElementById('attackBtn').disabled = gameState.energy <= 0;
-  document.getElementById('specialBtn').disabled = gameState.energy < gameState.getSpecialCost();
-  document.getElementById('specialBtn').innerHTML = `💥 Критудар (${gameState.getSpecialCost()}⚡, x3 урон)`;
+  const attackBtn = document.getElementById('attackBtn');
+  const specialBtn = document.getElementById('specialBtn');
+  
+  if (attackBtn) attackBtn.disabled = gameState.energy <= 0;
+  if (specialBtn) {
+    specialBtn.disabled = gameState.energy < gameState.getSpecialCost();
+    specialBtn.innerHTML = `💥 Критудар (${gameState.getSpecialCost()}⚡, x3 урон)`;
+  }
 }
 
 // ============================================
@@ -1439,8 +1474,12 @@ function switchTab(tab) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   
-  document.getElementById(tab).classList.add('active');
-  event.target.classList.add('active');
+  const screen = document.getElementById(tab);
+  if (screen) screen.classList.add('active');
+  
+  if (event && event.target) {
+    event.target.classList.add('active');
+  }
 
   if (tab === 'leaderboard') loadLeaderboard();
   if (tab === 'inventory') updateEquipment();
@@ -1461,23 +1500,3 @@ function showMessage(text) {
 // СТАРТ ГРИ
 // ============================================
 loadGame();
-// === FIX ДЛЯ КНОПОК ===
-window.attack = function () {
-  console.log("ATTACK CLICK");
-  if (typeof attackEnemy === "function") {
-    attackEnemy();
-  } else {
-    alert("attackEnemy не знайдена");
-  }
-};
-
-window.specialAttack = function () {
-  console.log("SPECIAL CLICK");
-  if (typeof window.specialAttackInternal === "function") {
-    window.specialAttackInternal();
-  } else if (typeof window.specialAttack === "function") {
-    // якщо є стара
-  } else {
-    alert("specialAttack не знайдена");
-  }
-};
