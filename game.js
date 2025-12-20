@@ -1499,28 +1499,100 @@ function showMessage(text) {
 }
 
 // ============================================
-// СТАРТ ГРИ
+// ІНІЦІАЛІЗАЦІЯ ПІСЛЯ ЗАВАНТАЖЕННЯ DOM
 // ============================================
-loadGame();
-// ============================================
-// EVENT LISTENERS
-// ============================================
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('DOM завантажено, ініціалізація гри...');
+  
+  // EVENT LISTENERS ДЛЯ ТАБІВ
+  const tabs = {
+    'tab-arena': 'arena',
+    'tab-class': 'class',
+    'tab-skills': 'skills',
+    'tab-inventory': 'inventory',
+    'tab-city': 'city',
+    'tab-shop': 'shop',
+    'tab-quests': 'quests',
+    'tab-achievements': 'achievements',
+    'tab-leaderboard': 'leaderboard'
+  };
+  
+  Object.keys(tabs).forEach(tabId => {
+    const tabElement = document.getElementById(tabId);
+    if (tabElement) {
+      tabElement.addEventListener('click', function(e) {
+        e.preventDefault();
+        switchTab(tabs[tabId]);
+      });
+    }
+  });
+  
+  // EVENT LISTENERS ДЛЯ КНОПОК АРЕНИ
+  const attackBtn = document.getElementById('attackBtn');
+  if (attackBtn) {
+    attackBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      attack();
+    });
+  }
+  
+  const specialBtn = document.getElementById('specialBtn');
+  if (specialBtn) {
+    specialBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      specialAttack();
+    });
+  }
+  
+  const potionBtn = document.getElementById('potionBtn');
+  if (potionBtn) {
+    potionBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      usePotion();
+    });
+  }
+  
+  // EVENT LISTENER ДЛЯ РЕЙТИНГУ
+  const refreshBtn = document.getElementById('refreshLeaderboardBtn');
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      loadLeaderboard();
+    });
+  }
+  
+  // СТАРТ ГРИ
+  loadGame();
+  
+  console.log('Гра ініціалізована!');
+});
 
-// Таби
-document.getElementById('tab-arena')?.addEventListener('click', () => switchTab('arena'));
-document.getElementById('tab-class')?.addEventListener('click', () => switchTab('class'));
-document.getElementById('tab-skills')?.addEventListener('click', () => switchTab('skills'));
-document.getElementById('tab-inventory')?.addEventListener('click', () => switchTab('inventory'));
-document.getElementById('tab-city')?.addEventListener('click', () => switchTab('city'));
-document.getElementById('tab-shop')?.addEventListener('click', () => switchTab('shop'));
-document.getElementById('tab-quests')?.addEventListener('click', () => switchTab('quests'));
-document.getElementById('tab-achievements')?.addEventListener('click', () => switchTab('achievements'));
-document.getElementById('tab-leaderboard')?.addEventListener('click', () => switchTab('leaderboard'));
-
-// Кнопки арени
-document.getElementById('attackBtn')?.addEventListener('click', attack);
-document.getElementById('specialBtn')?.addEventListener('click', specialAttack);
-document.getElementById('potionBtn')?.addEventListener('click', usePotion);
-
-// Рейтинг
-document.getElementById('refreshLeaderboardBtn')?.addEventListener('click', loadLeaderboard);
+// ЗАПАСНИЙ ВАРІАНТ - якщо DOMContentLoaded вже пройшов
+if (document.readyState === 'loading') {
+  // DOM ще не завантажений, чекаємо на DOMContentLoaded
+} else {
+  // DOM вже завантажений
+  setTimeout(() => {
+    if (!window.gameInitialized) {
+      window.gameInitialized = true;
+      
+      // Повторна ініціалізація кнопок
+      const attackBtn = document.getElementById('attackBtn');
+      if (attackBtn) {
+        attackBtn.onclick = attack;
+      }
+      
+      const specialBtn = document.getElementById('specialBtn');
+      if (specialBtn) {
+        specialBtn.onclick = specialAttack;
+      }
+      
+      const potionBtn = document.getElementById('potionBtn');
+      if (potionBtn) {
+        potionBtn.onclick = usePotion;
+      }
+      
+      loadGame();
+    }
+  }, 100);
+}
