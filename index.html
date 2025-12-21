@@ -44,8 +44,10 @@
     .resources {
       display: flex;
       justify-content: space-around;
-      font-size: 18px;
+      font-size: 16px;
       color: #000 !important;
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
     .resources div {
@@ -56,18 +58,21 @@
       display: flex;
       gap: 5px;
       margin-bottom: 10px;
+      overflow-x: auto;
     }
 
     .tab {
       flex: 1;
-      padding: 12px;
+      padding: 12px 8px;
       background: #e8e8e8 !important;
       border: none;
       color: #000 !important;
-      font-size: 16px;
+      font-size: 14px;
       border-radius: 8px;
       cursor: pointer;
       font-weight: 500;
+      white-space: nowrap;
+      min-width: 80px;
     }
 
     .tab.active {
@@ -95,6 +100,22 @@
       border-radius: 12px;
       text-align: center;
       margin-bottom: 20px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .enemy-card.shake {
+      animation: shake 0.3s !important;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
     }
 
     .enemy-name {
@@ -119,13 +140,18 @@
     .btn {
       width: 100%;
       padding: 16px;
-      font-size: 20px;
+      font-size: 18px;
       border: none;
       border-radius: 12px;
       cursor: pointer;
       margin-top: 10px;
       font-weight: bold;
       box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      transition: transform 0.1s;
+    }
+
+    .btn:active {
+      transform: scale(0.95);
     }
 
     .btn-attack {
@@ -136,6 +162,18 @@
     .btn-primary {
       background: #FFD700 !important;
       color: #000 !important;
+    }
+
+    .btn-success {
+      background: #5cb85c !important;
+      color: #fff !important;
+    }
+
+    .btn:disabled {
+      background: #ccc !important;
+      color: #666 !important;
+      cursor: not-allowed;
+      opacity: 0.6;
     }
 
     .building {
@@ -188,12 +226,6 @@
       font-size: 16px;
     }
 
-    .btn-upgrade:disabled {
-      background: #ccc !important;
-      color: #666 !important;
-      cursor: not-allowed;
-    }
-
     .stats-grid {
       display: grid;
       gap: 15px;
@@ -232,11 +264,84 @@
       font-weight: bold;
       z-index: 1000;
       animation: slideDown 0.3s ease;
+      max-width: 90%;
     }
 
     @keyframes slideDown {
       from { top: -100px; opacity: 0; }
       to { top: 20px; opacity: 1; }
+    }
+
+    .lootbox {
+      background: linear-gradient(135deg, #fa709a, #fee140);
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .lootbox-info {
+      flex: 1;
+    }
+
+    .lootbox-name {
+      font-size: 18px;
+      font-weight: bold;
+      color: #000;
+      margin-bottom: 5px;
+    }
+
+    .lootbox-desc {
+      font-size: 12px;
+      color: #333;
+    }
+
+    .pvp-opponent {
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid #ddd;
+    }
+
+    .opponent-info {
+      flex: 1;
+    }
+
+    .opponent-name {
+      font-size: 16px;
+      font-weight: bold;
+      color: #000;
+      margin-bottom: 5px;
+    }
+
+    .opponent-stats {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .info-box {
+      background: #e3f2fd;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      border-left: 4px solid #2196F3;
+    }
+
+    .info-box h4 {
+      color: #000;
+      margin-bottom: 8px;
+    }
+
+    .info-box p {
+      color: #333;
+      font-size: 14px;
+      line-height: 1.5;
     }
   </style>
 </head>
@@ -248,18 +353,22 @@
     <div class="resources">
       <div>🏆 <span id="wins">0</span></div>
       <div>💰 <span id="gold">0</span></div>
-      <div>⚡ Сила: <span id="power">1</span></div>
+      <div>⚡ <span id="power">1</span></div>
+      <div>🎁 <span id="lootboxCount">0</span></div>
     </div>
   </div>
 
   <div class="tabs">
     <button class="tab active" onclick="switchTab('arena')">⚔️ Арена</button>
+    <button class="tab" onclick="switchTab('pvp')">👥 PvP</button>
+    <button class="tab" onclick="switchTab('lootbox')">🎰 Лутбокс</button>
     <button class="tab" onclick="switchTab('city')">🏰 Місто</button>
     <button class="tab" onclick="switchTab('stats')">📊 Статистика</button>
   </div>
 
+  <!-- АРЕНА -->
   <div id="arena" class="screen active">
-    <div class="enemy-card">
+    <div class="enemy-card" id="enemyCard">
       <div class="enemy-name" id="enemyName">Загарбник</div>
       <div class="enemy-level" id="enemyLevel">Рівень 1</div>
       <div class="enemy-hp">❤️ <span id="enemyHp">20</span></div>
@@ -267,6 +376,49 @@
     <button class="btn btn-attack" onclick="attack()">⚔️ Удар (<span id="damage">1</span> шкоди)</button>
   </div>
 
+  <!-- PVP -->
+  <div id="pvp" class="screen">
+    <div class="info-box">
+      <h4>👥 PvP Арена</h4>
+      <p>Ваш рейтинг: <strong id="pvpRating">1000</strong></p>
+      <p>Перемог: <strong id="pvpWins">0</strong> | Програшів: <strong id="pvpLosses">0</strong></p>
+    </div>
+    <div id="pvpList"></div>
+  </div>
+
+  <!-- ЛУТБОКС -->
+  <div id="lootbox" class="screen">
+    <div class="info-box">
+      <h4>🎰 Лутбокси</h4>
+      <p>Відкрито лутбоксів: <strong id="lootboxesOpened">0</strong></p>
+    </div>
+    
+    <div class="lootbox">
+      <div class="lootbox-info">
+        <div class="lootbox-name">📦 Звичайний</div>
+        <div class="lootbox-desc">💰 20-50 золота, 🎁 можливі сюрпризи</div>
+      </div>
+      <button class="btn btn-primary" style="width: auto; padding: 10px 20px; margin: 0;" onclick="openLootbox('common')">50💰</button>
+    </div>
+
+    <div class="lootbox">
+      <div class="lootbox-info">
+        <div class="lootbox-name">🎁 Рідкісний</div>
+        <div class="lootbox-desc">💰 50-150 золота, ⚡ +1 сила</div>
+      </div>
+      <button class="btn btn-primary" style="width: auto; padding: 10px 20px; margin: 0;" onclick="openLootbox('rare')">150💰</button>
+    </div>
+
+    <div class="lootbox">
+      <div class="lootbox-info">
+        <div class="lootbox-name">💎 Епічний</div>
+        <div class="lootbox-desc">💰 200-500 золота, ⚡ +2 сила</div>
+      </div>
+      <button class="btn btn-primary" style="width: auto; padding: 10px 20px; margin: 0;" onclick="openLootbox('epic')">500💰</button>
+    </div>
+  </div>
+
+  <!-- МІСТО -->
   <div id="city" class="screen">
     <div class="building">
       <div class="building-header">
@@ -299,6 +451,7 @@
     </div>
   </div>
 
+  <!-- СТАТИСТИКА -->
   <div id="stats" class="screen">
     <div class="stats-grid">
       <div class="stat-card">
@@ -312,6 +465,14 @@
       <div class="stat-card">
         <div class="stat-label">Поточна сила</div>
         <div class="stat-value" id="totalPower">1</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Відкрито лутбоксів</div>
+        <div class="stat-value" id="totalLootboxes">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">PvP рейтинг</div>
+        <div class="stat-value" id="statPvpRating">1000</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Найсильніший ворог</div>
@@ -344,14 +505,18 @@
     power: 1,
     currentEnemy: 0,
     enemyHp: 20,
-    buildings: { forge: 1, treasury: 1, fortress: 1 }
+    buildings: { forge: 1, treasury: 1, fortress: 1 },
+    lootboxesOpened: 0,
+    pvpRating: 1000,
+    pvpWins: 0,
+    pvpLosses: 0
   };
 
   function loadGame() {
     if (tg.CloudStorage) {
       tg.CloudStorage.getItem('gameState', (err, data) => {
         if (data) {
-          gameState = JSON.parse(data);
+          gameState = {...gameState, ...JSON.parse(data)};
           spawnEnemy();
           updateUI();
         } else {
@@ -361,7 +526,7 @@
     } else {
       const saved = localStorage.getItem('kozakGame');
       if (saved) {
-        gameState = JSON.parse(saved);
+        gameState = {...gameState, ...JSON.parse(saved)};
         spawnEnemy();
       }
       updateUI();
@@ -386,7 +551,14 @@
 
   function attack() {
     gameState.enemyHp -= gameState.power;
-    tg.HapticFeedback.impactOccurred("medium");
+    
+    if (tg.HapticFeedback) {
+      tg.HapticFeedback.impactOccurred("medium");
+    }
+
+    const card = document.getElementById('enemyCard');
+    card.classList.add('shake');
+    setTimeout(() => card.classList.remove('shake'), 300);
 
     if (gameState.enemyHp <= 0) {
       const enemy = enemies[gameState.currentEnemy];
@@ -397,7 +569,10 @@
       gameState.totalGold += goldReward;
 
       showMessage(`🏆 Перемога! +${goldReward} 💰`);
-      tg.HapticFeedback.notificationOccurred("success");
+      
+      if (tg.HapticFeedback) {
+        tg.HapticFeedback.notificationOccurred("success");
+      }
 
       spawnEnemy();
     }
@@ -424,13 +599,109 @@
       }
 
       showMessage(`✅ Покращено!`);
-      tg.HapticFeedback.notificationOccurred("success");
+      
+      if (tg.HapticFeedback) {
+        tg.HapticFeedback.notificationOccurred("success");
+      }
+      
       updateUI();
       saveGame();
     } else {
       showMessage(`❌ Не вистачає золота`);
-      tg.HapticFeedback.notificationOccurred("error");
+      
+      if (tg.HapticFeedback) {
+        tg.HapticFeedback.notificationOccurred("error");
+      }
     }
+  }
+
+  function openLootbox(type) {
+    const prices = { common: 50, rare: 150, epic: 500 };
+    const price = prices[type];
+
+    if (gameState.gold < price) {
+      showMessage('❌ Не вистачає золота');
+      if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred("error");
+      return;
+    }
+
+    gameState.gold -= price;
+    gameState.lootboxesOpened++;
+
+    let reward = '';
+    let goldAmount = 0;
+
+    if (type === 'common') {
+      goldAmount = Math.floor(Math.random() * 31) + 20;
+      gameState.gold += goldAmount;
+      reward = `💰 ${goldAmount} золота`;
+    } else if (type === 'rare') {
+      goldAmount = Math.floor(Math.random() * 101) + 50;
+      gameState.gold += goldAmount;
+      gameState.power += 1;
+      reward = `💰 ${goldAmount} золота + ⚡ +1 сила`;
+    } else if (type === 'epic') {
+      goldAmount = Math.floor(Math.random() * 301) + 200;
+      gameState.gold += goldAmount;
+      gameState.power += 2;
+      reward = `💰 ${goldAmount} золота + ⚡ +2 сила`;
+    }
+
+    showMessage(`🎁 Отримано: ${reward}`);
+    
+    if (tg.HapticFeedback) {
+      tg.HapticFeedback.notificationOccurred("success");
+    }
+
+    updateUI();
+    saveGame();
+  }
+
+  function renderPvP() {
+    const container = document.getElementById('pvpList');
+    let html = '';
+
+    for (let i = 0; i < 5; i++) {
+      const ratingDiff = Math.floor(Math.random() * 200) - 100;
+      const opponentRating = Math.max(800, gameState.pvpRating + ratingDiff);
+      const opponentPower = Math.max(1, Math.floor(opponentRating / 150));
+      const name = `Козак ${Math.floor(Math.random() * 1000)}`;
+
+      html += `
+        <div class="pvp-opponent">
+          <div class="opponent-info">
+            <div class="opponent-name">⚔️ ${name}</div>
+            <div class="opponent-stats">Рейтинг: ${opponentRating} | Сила: ${opponentPower}</div>
+          </div>
+          <button class="btn btn-success" style="width: auto; padding: 10px 20px; margin: 0;" onclick="startPvP(${opponentPower}, ${opponentRating})">Битва</button>
+        </div>
+      `;
+    }
+
+    container.innerHTML = html;
+  }
+
+  function startPvP(opponentPower, opponentRating) {
+    const myPower = gameState.power;
+    const winChance = myPower / (myPower + opponentPower);
+    const won = Math.random() < winChance;
+
+    if (won) {
+      gameState.pvpWins++;
+      gameState.pvpRating += 10;
+      gameState.gold += 50;
+      showMessage('🏆 Перемога в PvP! +50💰, +10 рейтингу');
+      if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred("success");
+    } else {
+      gameState.pvpLosses++;
+      gameState.pvpRating = Math.max(800, gameState.pvpRating - 5);
+      showMessage('😔 Поразка в PvP. -5 рейтингу');
+      if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred("error");
+    }
+
+    updateUI();
+    renderPvP();
+    saveGame();
   }
 
   function updateUI() {
@@ -440,6 +711,7 @@
     document.getElementById('gold').textContent = gameState.gold;
     document.getElementById('power').textContent = gameState.power;
     document.getElementById('damage').textContent = gameState.power;
+    document.getElementById('lootboxCount').textContent = gameState.lootboxesOpened;
 
     document.getElementById('enemyName').textContent = enemy.name;
     document.getElementById('enemyLevel').textContent = `Рівень ${enemy.level}`;
@@ -461,6 +733,12 @@
     document.getElementById('totalGold').textContent = gameState.totalGold;
     document.getElementById('totalPower').textContent = gameState.power;
     document.getElementById('maxEnemy').textContent = Math.max(gameState.currentEnemy + 1, 1);
+    document.getElementById('totalLootboxes').textContent = gameState.lootboxesOpened;
+    document.getElementById('lootboxesOpened').textContent = gameState.lootboxesOpened;
+    document.getElementById('pvpRating').textContent = gameState.pvpRating;
+    document.getElementById('pvpWins').textContent = gameState.pvpWins;
+    document.getElementById('pvpLosses').textContent = gameState.pvpLosses;
+    document.getElementById('statPvpRating').textContent = gameState.pvpRating;
   }
 
   function switchTab(tab) {
@@ -469,6 +747,8 @@
     
     document.getElementById(tab).classList.add('active');
     event.target.classList.add('active');
+
+    if (tab === 'pvp') renderPvP();
   }
 
   function showMessage(text) {
@@ -488,7 +768,11 @@
         power: 1,
         currentEnemy: 0,
         enemyHp: 20,
-        buildings: { forge: 1, treasury: 1, fortress: 1 }
+        buildings: { forge: 1, treasury: 1, fortress: 1 },
+        lootboxesOpened: 0,
+        pvpRating: 1000,
+        pvpWins: 0,
+        pvpLosses: 0
       };
       spawnEnemy();
       updateUI();
