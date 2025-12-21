@@ -137,6 +137,31 @@
       color: #ffe0b2 !important;
     }
 
+    .energy-bar {
+      background: #e0e0e0;
+      border-radius: 10px;
+      height: 20px;
+      margin: 15px 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .energy-fill {
+      background: linear-gradient(90deg, #FFD700, #FFA500);
+      height: 100%;
+      transition: width 0.3s;
+    }
+
+    .energy-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-weight: bold;
+      font-size: 12px;
+      color: #000;
+    }
+
     .btn {
       width: 100%;
       padding: 16px;
@@ -156,6 +181,16 @@
 
     .btn-attack {
       background: #ff5555 !important;
+      color: #fff !important;
+    }
+
+    .btn-critical {
+      background: #ff9500 !important;
+      color: #fff !important;
+    }
+
+    .btn-block {
+      background: #4A90E2 !important;
       color: #fff !important;
     }
 
@@ -343,6 +378,22 @@
       font-size: 14px;
       line-height: 1.5;
     }
+
+    .battle-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .battle-buttons .btn {
+      font-size: 14px;
+      padding: 12px;
+    }
+
+    .shield-active {
+      border: 3px solid #4A90E2 !important;
+      box-shadow: 0 0 15px rgba(74, 144, 226, 0.5);
+    }
   </style>
 </head>
 <body>
@@ -373,7 +424,18 @@
       <div class="enemy-level" id="enemyLevel">Рівень 1</div>
       <div class="enemy-hp">❤️ <span id="enemyHp">20</span></div>
     </div>
+
+    <div class="energy-bar">
+      <div class="energy-fill" id="energyFill" style="width: 100%;"></div>
+      <div class="energy-text">⚡ <span id="energyText">10/10</span></div>
+    </div>
+
     <button class="btn btn-attack" onclick="attack()">⚔️ Удар (<span id="damage">1</span> шкоди)</button>
+    
+    <div class="battle-buttons">
+      <button class="btn btn-critical" onclick="criticalAttack()" id="critBtn">💥 Критудар (3⚡)</button>
+      <button class="btn btn-block" onclick="blockAttack()" id="blockBtn">🛡️ Блок (2⚡)</button>
+    </div>
   </div>
 
   <!-- PVP -->
@@ -449,6 +511,16 @@
       <div class="building-cost">💰 Вартість: <span id="fortressCost">200</span></div>
       <button class="btn btn-upgrade" onclick="upgradeBuilding('fortress')" id="fortressBtn">Покращити</button>
     </div>
+
+    <div class="building">
+      <div class="building-header">
+        <div class="building-title">⚡ Генератор</div>
+        <div class="building-level">Рівень <span id="generatorLevel">1</span></div>
+      </div>
+      <div class="building-desc">+2 до макс. енергії</div>
+      <div class="building-cost">💰 Вартість: <span id="generatorCost">150</span></div>
+      <button class="btn btn-upgrade" onclick="upgradeBuilding('generator')" id="generatorBtn">Покращити</button>
+    </div>
   </div>
 
   <!-- СТАТИСТИКА -->
@@ -475,8 +547,8 @@
         <div class="stat-value" id="statPvpRating">1000</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Найсильніший ворог</div>
-        <div class="stat-value" id="maxEnemy">1</div>
+        <div class="stat-label">Критичних ударів</div>
+        <div class="stat-value" id="totalCrits">0</div>
       </div>
     </div>
     <button class="btn btn-primary" onclick="resetProgress()" style="margin-top: 20px;">🔄 Скинути прогрес</button>
@@ -489,13 +561,13 @@
   tg.expand();
 
   const enemies = [
-    { name: "Загарбник", hp: 20, gold: 10, level: 1 },
-    { name: "Вояк", hp: 35, gold: 20, level: 2 },
-    { name: "Опричник", hp: 60, gold: 35, level: 3 },
-    { name: "Шляхтич", hp: 100, gold: 60, level: 4 },
-    { name: "Боярин", hp: 150, gold: 100, level: 5 },
-    { name: "Воєвода", hp: 250, gold: 180, level: 6 },
-    { name: "Генерал", hp: 400, gold: 300, level: 7 }
+    { name: "Загарбник", hp: 20, gold: 10, level: 1, damage: 2 },
+    { name: "Вояк", hp: 35, gold: 20, level: 2, damage: 4 },
+    { name: "Опричник", hp: 60, gold: 35, level: 3, damage: 6 },
+    { name: "Шляхтич", hp: 100, gold: 60, level: 4, damage: 10 },
+    { name: "Боярин", hp: 150, gold: 100, level: 5, damage: 15 },
+    { name: "Воєвода", hp: 250, gold: 180, level: 6, damage: 22 },
+    { name: "Генерал", hp: 400, gold: 300, level: 7, damage: 30 }
   ];
 
   let gameState = {
@@ -505,12 +577,25 @@
     power: 1,
     currentEnemy: 0,
     enemyHp: 20,
-    buildings: { forge: 1, treasury: 1, fortress: 1 },
+    energy: 10,
+    maxEnergy: 10,
+    isBlocking: false,
+    buildings: { forge: 1, treasury: 1, fortress: 1, generator: 1 },
     lootboxesOpened: 0,
     pvpRating: 1000,
     pvpWins: 0,
-    pvpLosses: 0
+    pvpLosses: 0,
+    totalCrits: 0
   };
+
+  // Відновлення енергії
+  setInterval(() => {
+    if (gameState.energy < gameState.maxEnergy) {
+      gameState.energy++;
+      updateUI();
+      saveGame();
+    }
+  }, 5000); // кожні 5 секунд +1 енергія
 
   function loadGame() {
     if (tg.CloudStorage) {
@@ -547,9 +632,19 @@
     gameState.currentEnemy = Math.floor(Math.random() * (maxLevel + 1));
     const enemy = enemies[gameState.currentEnemy];
     gameState.enemyHp = enemy.hp;
+    gameState.isBlocking = false;
+    
+    const card = document.getElementById('enemyCard');
+    card.classList.remove('shield-active');
   }
 
   function attack() {
+    if (gameState.energy < 1) {
+      showMessage('❌ Недостатньо енергії!');
+      return;
+    }
+
+    gameState.energy -= 1;
     gameState.enemyHp -= gameState.power;
     
     if (tg.HapticFeedback) {
@@ -561,31 +656,116 @@
     setTimeout(() => card.classList.remove('shake'), 300);
 
     if (gameState.enemyHp <= 0) {
-      const enemy = enemies[gameState.currentEnemy];
-      const goldReward = enemy.gold + (gameState.buildings.treasury - 1) * 10;
-      
-      gameState.wins++;
-      gameState.gold += goldReward;
-      gameState.totalGold += goldReward;
-
-      showMessage(`🏆 Перемога! +${goldReward} 💰`);
-      
-      if (tg.HapticFeedback) {
-        tg.HapticFeedback.notificationOccurred("success");
-      }
-
-      spawnEnemy();
+      victory();
+    } else {
+      enemyAttack();
     }
 
     updateUI();
     saveGame();
   }
 
+  function criticalAttack() {
+    if (gameState.energy < 3) {
+      showMessage('❌ Потрібно 3 енергії!');
+      if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred("error");
+      return;
+    }
+
+    gameState.energy -= 3;
+    const damage = gameState.power * 3;
+    gameState.enemyHp -= damage;
+    gameState.totalCrits++;
+    
+    showMessage(`💥 Критудар! ${damage} шкоди!`);
+    
+    if (tg.HapticFeedback) {
+      tg.HapticFeedback.impactOccurred("heavy");
+    }
+
+    const card = document.getElementById('enemyCard');
+    card.classList.add('shake');
+    setTimeout(() => card.classList.remove('shake'), 300);
+
+    if (gameState.enemyHp <= 0) {
+      victory();
+    } else {
+      enemyAttack();
+    }
+
+    updateUI();
+    saveGame();
+  }
+
+  function blockAttack() {
+    if (gameState.energy < 2) {
+      showMessage('❌ Потрібно 2 енергії!');
+      if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred("error");
+      return;
+    }
+
+    gameState.energy -= 2;
+    gameState.isBlocking = true;
+    
+    showMessage('🛡️ Блок активовано!');
+    
+    if (tg.HapticFeedback) {
+      tg.HapticFeedback.impactOccurred("light");
+    }
+
+    const card = document.getElementById('enemyCard');
+    card.classList.add('shield-active');
+
+    setTimeout(() => {
+      gameState.isBlocking = false;
+      card.classList.remove('shield-active');
+    }, 3000);
+
+    updateUI();
+    saveGame();
+  }
+
+  function enemyAttack() {
+    setTimeout(() => {
+      const enemy = enemies[gameState.currentEnemy];
+      let damage = enemy.damage;
+      
+      if (gameState.isBlocking) {
+        damage = Math.floor(damage * 0.5);
+        showMessage(`🛡️ Блоковано! Лише ${damage} шкоди`);
+        gameState.isBlocking = false;
+        document.getElementById('enemyCard').classList.remove('shield-active');
+      }
+
+      // Тут можна додати логіку зменшення HP гравця, якщо потрібно
+      
+      updateUI();
+    }, 800);
+  }
+
+  function victory() {
+    const enemy = enemies[gameState.currentEnemy];
+    const goldReward = enemy.gold + (gameState.buildings.treasury - 1) * 10;
+    
+    gameState.wins++;
+    gameState.gold += goldReward;
+    gameState.totalGold += goldReward;
+
+    showMessage(`🏆 Перемога! +${goldReward} 💰`);
+    
+    if (tg.HapticFeedback) {
+      tg.HapticFeedback.notificationOccurred("success");
+    }
+
+    spawnEnemy();
+  }
+
   function upgradeBuilding(type) {
     const costs = {
       forge: 50 * gameState.buildings.forge,
       treasury: 100 * gameState.buildings.treasury,
-      fortress: 200 * gameState.buildings.fortress
+      fortress: 200 * gameState.buildings.fortress,
+      generator: 150 * gameState.buildings.generator
     };
 
     const cost = costs[type];
@@ -596,6 +776,9 @@
 
       if (type === 'forge') {
         gameState.power = gameState.buildings.forge;
+      } else if (type === 'generator') {
+        gameState.maxEnergy = 10 + (gameState.buildings.generator - 1) * 2;
+        gameState.energy = gameState.maxEnergy;
       }
 
       showMessage(`✅ Покращено!`);
@@ -717,6 +900,16 @@
     document.getElementById('enemyLevel').textContent = `Рівень ${enemy.level}`;
     document.getElementById('enemyHp').textContent = gameState.enemyHp;
 
+    // Енергія
+    document.getElementById('energyText').textContent = `${gameState.energy}/${gameState.maxEnergy}`;
+    const energyPercent = (gameState.energy / gameState.maxEnergy) * 100;
+    document.getElementById('energyFill').style.width = `${energyPercent}%`;
+
+    // Кнопки атак
+    document.getElementById('critBtn').disabled = gameState.energy < 3;
+    document.getElementById('blockBtn').disabled = gameState.energy < 2;
+
+    // Будівлі
     document.getElementById('forgeLevel').textContent = gameState.buildings.forge;
     document.getElementById('forgeCost').textContent = 50 * gameState.buildings.forge;
     document.getElementById('forgeBtn').disabled = gameState.gold < 50 * gameState.buildings.forge;
@@ -729,16 +922,21 @@
     document.getElementById('fortressCost').textContent = 200 * gameState.buildings.fortress;
     document.getElementById('fortressBtn').disabled = gameState.gold < 200 * gameState.buildings.fortress || gameState.buildings.fortress >= enemies.length;
 
+    document.getElementById('generatorLevel').textContent = gameState.buildings.generator;
+    document.getElementById('generatorCost').textContent = 150 * gameState.buildings.generator;
+    document.getElementById('generatorBtn').disabled = gameState.gold < 150 * gameState.buildings.generator;
+
+    // Статистика
     document.getElementById('totalWins').textContent = gameState.wins;
     document.getElementById('totalGold').textContent = gameState.totalGold;
     document.getElementById('totalPower').textContent = gameState.power;
-    document.getElementById('maxEnemy').textContent = Math.max(gameState.currentEnemy + 1, 1);
     document.getElementById('totalLootboxes').textContent = gameState.lootboxesOpened;
     document.getElementById('lootboxesOpened').textContent = gameState.lootboxesOpened;
     document.getElementById('pvpRating').textContent = gameState.pvpRating;
     document.getElementById('pvpWins').textContent = gameState.pvpWins;
     document.getElementById('pvpLosses').textContent = gameState.pvpLosses;
     document.getElementById('statPvpRating').textContent = gameState.pvpRating;
+    document.getElementById('totalCrits').textContent = gameState.totalCrits;
   }
 
   function switchTab(tab) {
@@ -768,11 +966,15 @@
         power: 1,
         currentEnemy: 0,
         enemyHp: 20,
-        buildings: { forge: 1, treasury: 1, fortress: 1 },
+        energy: 10,
+        maxEnergy: 10,
+        isBlocking: false,
+        buildings: { forge: 1, treasury: 1, fortress: 1, generator: 1 },
         lootboxesOpened: 0,
         pvpRating: 1000,
         pvpWins: 0,
-        pvpLosses: 0
+        pvpLosses: 0,
+        totalCrits: 0
       };
       spawnEnemy();
       updateUI();
